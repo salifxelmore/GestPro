@@ -1191,7 +1191,7 @@ function modalClient(id) {
                 <div class="form-group"><label class="form-label">NINEA</label><input class="form-input" type="text" id="cNinea" value="${c.ninea || ''}" placeholder="Numéro NINEA (entreprises)"></div>
                 <div class="form-group"><label class="form-label">Contact principal</label><input class="form-input" type="text" id="cContact" value="${c.contact || ''}" placeholder="Nom - Fonction"></div>
             </div>
-            <div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Annuler</button><button class="btn btn-primary" onclick="saveClient('${id}')"><i class="fas fa-check"></i> Enregistrer</button></div>
+            <div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Annuler</button><button class="btn btn-primary" onclick="saveClient('${id || ''}')"><i class="fas fa-check"></i> Enregistrer</button></div>
         </div>`, 'modal-lg');
 }
 
@@ -1237,11 +1237,10 @@ function modalFournisseur(id) {
                 <div class="form-group full"><label class="form-label">Nom *</label><input class="form-input" type="text" id="fNom" value="${f.nom}" placeholder="Nom du fournisseur"></div>
                 <div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" type="text" id="fTel" value="${f.telephone}" placeholder="+221 33 xxx xx xx"></div>
                 <div class="form-group"><label class="form-label">Adresse</label><input class="form-input" type="text" id="fAdresse" value="${f.adresse || ''}" placeholder="Adresse"></div>
-            </div>
                 <div class="form-group"><label class="form-label">NINEA</label><input class="form-input" type="text" id="fNinea" value="${f.ninea||''}" placeholder="Numéro NINEA"></div>
                 <div class="form-group full"><label class="form-label">Contact</label><input class="form-input" type="text" id="fContact" value="${f.contact||''}" placeholder="Nom - Fonction"></div>
             </div>
-            <div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Annuler</button><button class="btn btn-primary" onclick="saveFournisseur('${id}')"><i class="fas fa-check"></i> Enregistrer</button></div>
+            <div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Annuler</button><button class="btn btn-primary" onclick="saveFournisseur('${id || ''}')"><i class="fas fa-check"></i> Enregistrer</button></div>
         </div>`, 'modal-lg');
 }
 
@@ -1290,7 +1289,7 @@ function modalProduit(id) {
                 <div class="form-group"><label class="form-label">Stock actuel</label><input class="form-input" type="number" id="pStock" value="${p.stock}"></div>
                 <div class="form-group"><label class="form-label">Stock minimum</label><input class="form-input" type="number" id="pStockMin" value="${p.stockMin}"></div>
             </div>
-            <div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Annuler</button><button class="btn btn-primary" onclick="saveProduit('${id}')"><i class="fas fa-check"></i> Enregistrer</button></div>
+            <div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Annuler</button><button class="btn btn-primary" onclick="saveProduit('${id || ''}')"><i class="fas fa-check"></i> Enregistrer</button></div>
         </div>`);
 }
 
@@ -1654,7 +1653,7 @@ function modalEmploye(id) {
                 <div class="form-group"><label class="form-label">Poste</label><input class="form-input" type="text" id="ePoste" value="${e.poste}" placeholder="Intitulé du poste"></div>
                 <div class="form-group"><label class="form-label">Salaire (FCFA)</label><input class="form-input" type="number" id="eSalaire" value="${e.salaire}"></div>
             </div>
-            <div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Annuler</button><button class="btn btn-primary" onclick="saveEmploye('${id}')"><i class="fas fa-check"></i> Enregistrer</button></div>
+            <div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Annuler</button><button class="btn btn-primary" onclick="saveEmploye('${id || ''}')"><i class="fas fa-check"></i> Enregistrer</button></div>
         </div>`);
 }
 
