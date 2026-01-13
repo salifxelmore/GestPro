@@ -841,50 +841,148 @@ const toast = {
     warning(m) { this.show(m, 'warning'); }
 };
 
+// ========== SUPABASE ==========
+const SUPABASE_URL = 'https://utrxljpolthjradxrcnj.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0cnhsanBvbHRoanJhZHhyY25qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgyOTUyMzYsImV4cCI6MjA4Mzg3MTIzNn0.yIOfhszNIdQEftLHIHn5BvdHjPNDEtw6wS-euZFGuAQ';
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 // ========== DONNÉES ==========
 let data = {
     entreprise: { nom: 'Mon Entreprise', adresse: 'Dakar, Sénégal', telephone: '+221 77 000 00 00' },
-    clients: [
-        { id: '1', code: 'CLI-0001', nom: 'Amadou Diallo', type: 'particulier', telephone: '+221 77 123 45 67', email: 'amadou@email.com', adresse: 'Dakar', ninea: '', contact: '' },
-        { id: '2', code: 'CLI-0002', nom: 'SENELEC SA', type: 'entreprise', telephone: '+221 33 800 00 00', email: 'contact@senelec.sn', adresse: 'Dakar', ninea: '12345678A', contact: 'Fatou Sow - DG' },
-        { id: '3', code: 'CLI-0003', nom: 'Association Jeunesse', type: 'association', telephone: '+221 76 345 67 89', email: '', adresse: 'Saint-Louis', ninea: '', contact: 'Moussa Ndiaye' },
-    ],
-    fournisseurs: [
-        { id: '1', code: 'FRN-0001', nom: 'SENEGAL DISTRIBUTION', type: 'entreprise', telephone: '+221 33 800 00 00', adresse: 'Dakar', ninea: '98765432B', contact: 'Ibrahim Fall' },
-        { id: '2', code: 'FRN-0002', nom: 'TOUBA TRADING', type: 'entreprise', telephone: '+221 33 900 00 00', adresse: 'Touba', ninea: '45678901C', contact: 'Modou Diop' },
-    ],
-    categories: [
-        { id: '1', nom: 'Alimentation' },
-        { id: '2', nom: 'Boissons' },
-        { id: '3', nom: 'Électronique' },
-    ],
-    produits: [
-        { id: '1', ref: 'PRD001', nom: 'Riz Brisé 25kg', catId: '1', prixAchat: 12000, prixVente: 15000, stock: 8, stockMin: 10 },
-        { id: '2', ref: 'PRD002', nom: 'Huile Végétale 20L', catId: '1', prixAchat: 18000, prixVente: 22000, stock: 30, stockMin: 5 },
-        { id: '3', ref: 'PRD003', nom: 'Coca Cola Pack 24', catId: '2', prixAchat: 8000, prixVente: 10000, stock: 3, stockMin: 10 },
-        { id: '4', ref: 'PRD004', nom: 'Téléphone Basique', catId: '3', prixAchat: 15000, prixVente: 20000, stock: 15, stockMin: 5 },
-    ],
-    ventes: [
-        { id: '1', num: 'VTE-2025-001', date: '2025-01-10', clientId: '1', lignes: [{prodId:'1',qte:2,pu:15000}], total: 30000, paye: 30000, statut: 'payée', paiements: [{date:'2025-01-10',montant:30000,mode:'espèces'}] },
-        { id: '2', num: 'VTE-2025-002', date: '2025-01-12', clientId: '2', lignes: [{prodId:'2',qte:1,pu:22000},{prodId:'3',qte:2,pu:10000}], total: 42000, paye: 20000, statut: 'partielle', paiements: [{date:'2025-01-12',montant:20000,mode:'virement'}] },
-        { id: '3', num: 'VTE-2025-003', date: '2025-01-13', clientId: '3', lignes: [{prodId:'4',qte:3,pu:20000}], total: 60000, paye: 0, statut: 'impayée', paiements: [] },
-    ],
-    achats: [
-        { id: '1', num: 'ACH-2025-001', date: '2025-01-08', fournId: '1', lignes: [{prodId:'1',qte:20,pu:12000}], total: 240000, paye: 240000, statut: 'payé', paiements: [{date:'2025-01-08',montant:240000,mode:'virement'}] },
-        { id: '2', num: 'ACH-2025-002', date: '2025-01-09', fournId: '2', lignes: [{prodId:'2',qte:10,pu:18000}], total: 180000, paye: 100000, statut: 'partiel', paiements: [{date:'2025-01-09',montant:100000,mode:'espèces'}] },
-    ],
-    tresorerie: [
-        { id: '1', date: '2025-01-05', type: 'entree', cat: 'Apport', desc: 'Capital initial', montant: 500000, mode: 'espèces' },
-        { id: '2', date: '2025-01-08', type: 'sortie', cat: 'Achat', desc: 'Paiement ACH-2025-001', montant: 240000, mode: 'virement' },
-        { id: '3', date: '2025-01-09', type: 'sortie', cat: 'Achat', desc: 'Acompte ACH-2025-002', montant: 100000, mode: 'espèces' },
-        { id: '4', date: '2025-01-10', type: 'entree', cat: 'Vente', desc: 'VTE-2025-001', montant: 30000, mode: 'espèces' },
-        { id: '5', date: '2025-01-12', type: 'entree', cat: 'Vente', desc: 'Acompte VTE-2025-002', montant: 20000, mode: 'virement' },
-    ],
-    employes: [
-        { id: '1', matricule: 'EMP001', nom: 'Diop', prenom: 'Ibrahima', poste: 'Gérant', salaire: 350000 },
-        { id: '2', matricule: 'EMP002', nom: 'Ndiaye', prenom: 'Mariama', poste: 'Vendeuse', salaire: 150000 },
-    ]
+    clients: [],
+    fournisseurs: [],
+    categories: [],
+    produits: [],
+    ventes: [],
+    achats: [],
+    tresorerie: [],
+    employes: []
 };
+
+let isLoading = true;
+
+// ========== CHARGEMENT SUPABASE ==========
+async function loadAllData() {
+    isLoading = true;
+    render();
+    
+    try {
+        // Charger toutes les données en parallèle
+        const [clientsRes, fournisseursRes, categoriesRes, produitsRes, ventesRes, ventesLignesRes, achatsRes, achatsLignesRes, tresorerieRes, employesRes, entrepriseRes] = await Promise.all([
+            db.from('clients').select('*').order('nom'),
+            db.from('fournisseurs').select('*').order('nom'),
+            db.from('categories').select('*').order('nom'),
+            db.from('produits').select('*').order('nom'),
+            db.from('ventes').select('*').order('date', { ascending: false }),
+            db.from('ventes_lignes').select('*'),
+            db.from('achats').select('*').order('date', { ascending: false }),
+            db.from('achats_lignes').select('*'),
+            db.from('tresorerie').select('*').order('date', { ascending: false }),
+            db.from('employes').select('*').order('nom'),
+            db.from('entreprise').select('*').limit(1)
+        ]);
+
+        // Mapper les clients
+        data.clients = (clientsRes.data || []).map(c => ({
+            id: c.id,
+            code: c.code,
+            nom: c.nom,
+            type: c.type || 'particulier',
+            telephone: c.telephone,
+            email: c.email,
+            adresse: c.adresse,
+            ninea: c.ninea,
+            contact: c.contact
+        }));
+        
+        // Mapper les fournisseurs
+        data.fournisseurs = (fournisseursRes.data || []).map(f => ({
+            id: f.id,
+            code: f.code,
+            nom: f.nom,
+            type: f.type || 'entreprise',
+            telephone: f.telephone,
+            adresse: f.adresse,
+            ninea: f.ninea,
+            contact: f.contact
+        }));
+        
+        data.categories = categoriesRes.data || [];
+        
+        // Mapper les produits
+        data.produits = (produitsRes.data || []).map(p => ({
+            id: p.id,
+            ref: p.ref,
+            nom: p.nom,
+            catId: p.categorie_id,
+            prixAchat: parseFloat(p.prix_achat) || 0,
+            prixVente: parseFloat(p.prix_vente) || 0,
+            stock: parseInt(p.stock) || 0,
+            stockMin: parseInt(p.stock_min) || 0
+        }));
+        
+        data.employes = employesRes.data || [];
+        
+        // Mapper la trésorerie
+        data.tresorerie = (tresorerieRes.data || []).map(t => ({
+            id: t.id,
+            date: t.date,
+            type: t.type,
+            cat: t.categorie,
+            desc: t.description,
+            montant: parseFloat(t.montant) || 0,
+            mode: t.mode
+        }));
+        
+        if (entrepriseRes.data && entrepriseRes.data.length > 0) {
+            data.entreprise = entrepriseRes.data[0];
+        }
+
+        // Mapper les ventes avec les lignes
+        data.ventes = (ventesRes.data || []).map(v => ({
+            id: v.id,
+            num: v.num,
+            date: v.date,
+            clientId: v.client_id,
+            total: parseFloat(v.total) || 0,
+            paye: parseFloat(v.paye) || 0,
+            statut: v.statut || 'impayée',
+            lignes: (ventesLignesRes.data || []).filter(l => l.vente_id === v.id).map(l => ({
+                prodId: l.produit_id,
+                qte: parseInt(l.quantite) || 0,
+                pu: parseFloat(l.prix_unitaire) || 0
+            }))
+        }));
+
+        // Mapper les achats avec les lignes
+        data.achats = (achatsRes.data || []).map(a => ({
+            id: a.id,
+            num: a.num,
+            date: a.date,
+            fournId: a.fournisseur_id,
+            total: parseFloat(a.total) || 0,
+            paye: parseFloat(a.paye) || 0,
+            statut: a.statut || 'impayé',
+            lignes: (achatsLignesRes.data || []).filter(l => l.achat_id === a.id).map(l => ({
+                prodId: l.produit_id,
+                qte: parseInt(l.quantite) || 0,
+                pu: parseFloat(l.prix_unitaire) || 0
+            }))
+        }));
+
+        console.log('Données chargées depuis Supabase', data);
+    } catch (error) {
+        console.error('Erreur chargement:', error);
+        toast.error('Erreur de connexion à la base de données');
+    }
+    
+    isLoading = false;
+    render();
+}
+
+
+// Charger les données au démarrage
+loadAllData();
 
 let state = { page: 'dashboard', search: '', filterYear: new Date().getFullYear(), filterDateStart: '', filterDateEnd: '' };
 
@@ -977,6 +1075,21 @@ function nav(page) { state.page = page; state.search = ''; render(); }
 
 // ========== RENDER ==========
 function render() {
+    // Écran de chargement
+    if (isLoading) {
+        document.getElementById('app').innerHTML = `
+            <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:var(--gray-100)">
+                <div style="text-align:center">
+                    <div style="width:60px;height:60px;border:4px solid var(--gray-200);border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 20px"></div>
+                    <h2 style="color:var(--dark);margin-bottom:8px">Chargement...</h2>
+                    <p style="color:var(--gray-500)">Connexion à la base de données</p>
+                </div>
+            </div>
+            <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+        `;
+        return;
+    }
+    
     document.getElementById('app').innerHTML = `
         <div class="app">
             <aside class="sidebar">
@@ -1195,15 +1308,51 @@ function modalClient(id) {
         </div>`, 'modal-lg');
 }
 
-function saveClient(id) {
+async function saveClient(id) {
     const nom = document.getElementById('cNom').value.trim();
     if (!nom) return toast.error('Le nom est obligatoire');
-    const obj = { id: id || genId(), code: document.getElementById('cCode').value, nom, type: document.getElementById('cType').value, telephone: document.getElementById('cTel').value, email: document.getElementById('cEmail').value, adresse: document.getElementById('cAdresse').value, ninea: document.getElementById('cNinea').value, contact: document.getElementById('cContact').value };
-    if (id) { data.clients = data.clients.map(c => c.id === id ? obj : c); } else { data.clients.push(obj); }
-    toast.success('Client enregistré'); closeModal(); render();
+    
+    const obj = { 
+        code: document.getElementById('cCode').value, 
+        nom, 
+        type: document.getElementById('cType').value, 
+        telephone: document.getElementById('cTel').value, 
+        email: document.getElementById('cEmail').value, 
+        adresse: document.getElementById('cAdresse').value, 
+        ninea: document.getElementById('cNinea').value, 
+        contact: document.getElementById('cContact').value 
+    };
+    
+    try {
+        if (id) {
+            const { error } = await db.from('clients').update(obj).eq('id', id);
+            if (error) throw error;
+        } else {
+            const { error } = await db.from('clients').insert([obj]);
+            if (error) throw error;
+        }
+        toast.success('Client enregistré');
+        closeModal();
+        await loadAllData();
+    } catch (error) {
+        console.error('Erreur:', error);
+        toast.error('Erreur lors de l\'enregistrement');
+    }
 }
 
-function deleteClient(id) { if (confirm('Supprimer ce client ?')) { data.clients = data.clients.filter(c => c.id !== id); toast.success('Client supprimé'); render(); } }
+async function deleteClient(id) { 
+    if (confirm('Supprimer ce client ?')) { 
+        try {
+            const { error } = await db.from('clients').delete().eq('id', id);
+            if (error) throw error;
+            toast.success('Client supprimé');
+            await loadAllData();
+        } catch (error) {
+            console.error('Erreur:', error);
+            toast.error('Erreur lors de la suppression');
+        }
+    } 
+}
 
 function pageFournisseurs() {
     const filtered = data.fournisseurs.filter(f => f.nom.toLowerCase().includes(state.search.toLowerCase()) || (f.code||'').toLowerCase().includes(state.search.toLowerCase()));
@@ -1244,15 +1393,50 @@ function modalFournisseur(id) {
         </div>`, 'modal-lg');
 }
 
-function saveFournisseur(id) {
+async function saveFournisseur(id) {
     const nom = document.getElementById('fNom').value.trim();
     if (!nom) return toast.error('Le nom est obligatoire');
-    const obj = { id: id || genId(), code: document.getElementById('fCode').value, nom, type: document.getElementById('fType').value, telephone: document.getElementById('fTel').value, adresse: document.getElementById('fAdresse').value, ninea: document.getElementById('fNinea').value, contact: document.getElementById('fContact').value };
-    if (id) { data.fournisseurs = data.fournisseurs.map(f => f.id === id ? obj : f); } else { data.fournisseurs.push(obj); }
-    toast.success('Fournisseur enregistré'); closeModal(); render();
+    
+    const obj = { 
+        code: document.getElementById('fCode').value, 
+        nom, 
+        type: document.getElementById('fType').value, 
+        telephone: document.getElementById('fTel').value, 
+        adresse: document.getElementById('fAdresse').value, 
+        ninea: document.getElementById('fNinea').value, 
+        contact: document.getElementById('fContact').value 
+    };
+    
+    try {
+        if (id) {
+            const { error } = await db.from('fournisseurs').update(obj).eq('id', id);
+            if (error) throw error;
+        } else {
+            const { error } = await db.from('fournisseurs').insert([obj]);
+            if (error) throw error;
+        }
+        toast.success('Fournisseur enregistré');
+        closeModal();
+        await loadAllData();
+    } catch (error) {
+        console.error('Erreur:', error);
+        toast.error('Erreur lors de l\'enregistrement');
+    }
 }
 
-function deleteFournisseur(id) { if (confirm('Supprimer ?')) { data.fournisseurs = data.fournisseurs.filter(f => f.id !== id); toast.success('Supprimé'); render(); } }
+async function deleteFournisseur(id) { 
+    if (confirm('Supprimer ?')) { 
+        try {
+            const { error } = await db.from('fournisseurs').delete().eq('id', id);
+            if (error) throw error;
+            toast.success('Supprimé');
+            await loadAllData();
+        } catch (error) {
+            console.error('Erreur:', error);
+            toast.error('Erreur lors de la suppression');
+        }
+    } 
+}
 
 function pageProduits() {
     const filtered = data.produits.filter(p => p.nom.toLowerCase().includes(state.search.toLowerCase()) || p.ref.toLowerCase().includes(state.search.toLowerCase()));
@@ -1293,16 +1477,51 @@ function modalProduit(id) {
         </div>`);
 }
 
-function saveProduit(id) {
+async function saveProduit(id) {
     const nom = document.getElementById('pNom').value.trim();
     const ref = document.getElementById('pRef').value.trim();
     if (!nom || !ref) return toast.error('Nom et référence obligatoires');
-    const obj = { id: id || genId(), ref, nom, catId: document.getElementById('pCat').value, prixAchat: parseInt(document.getElementById('pPA').value) || 0, prixVente: parseInt(document.getElementById('pPV').value) || 0, stock: parseInt(document.getElementById('pStock').value) || 0, stockMin: parseInt(document.getElementById('pStockMin').value) || 0 };
-    if (id) { data.produits = data.produits.map(p => p.id === id ? obj : p); } else { data.produits.push(obj); }
-    toast.success('Produit enregistré'); closeModal();
+    
+    const obj = { 
+        ref, 
+        nom, 
+        categorie_id: document.getElementById('pCat').value || null, 
+        prix_achat: parseInt(document.getElementById('pPA').value) || 0, 
+        prix_vente: parseInt(document.getElementById('pPV').value) || 0, 
+        stock: parseInt(document.getElementById('pStock').value) || 0, 
+        stock_min: parseInt(document.getElementById('pStockMin').value) || 0 
+    };
+    
+    try {
+        if (id) {
+            const { error } = await db.from('produits').update(obj).eq('id', id);
+            if (error) throw error;
+        } else {
+            const { error } = await db.from('produits').insert([obj]);
+            if (error) throw error;
+        }
+        toast.success('Produit enregistré');
+        closeModal();
+        await loadAllData();
+    } catch (error) {
+        console.error('Erreur:', error);
+        toast.error('Erreur lors de l\'enregistrement');
+    }
 }
 
-function deleteProduit(id) { if (confirm('Supprimer ?')) { data.produits = data.produits.filter(p => p.id !== id); toast.success('Supprimé'); render(); } }
+async function deleteProduit(id) { 
+    if (confirm('Supprimer ?')) { 
+        try {
+            const { error } = await db.from('produits').delete().eq('id', id);
+            if (error) throw error;
+            toast.success('Supprimé');
+            await loadAllData();
+        } catch (error) {
+            console.error('Erreur:', error);
+            toast.error('Erreur lors de la suppression');
+        }
+    } 
+}
 
 function pageVentes() {
     return `<div class="page">
@@ -1352,36 +1571,56 @@ function modalPaiement(type, id) {
         </div>`);
 }
 
-function savePaiement(type, id) {
+async function savePaiement(type, id) {
     const montant = parseInt(document.getElementById('pMontant').value) || 0;
     if (montant <= 0) return toast.error('Montant invalide');
     const date = document.getElementById('pDate').value;
     const mode = document.getElementById('pMode').value;
     
-    if (type === 'vente') {
-        data.ventes = data.ventes.map(v => {
-            if (v.id === id) {
-                const newPaye = v.paye + montant;
-                const statut = newPaye >= v.total ? 'payée' : 'partielle';
-                return { ...v, paye: newPaye, statut, paiements: [...(v.paiements || []), {date, montant, mode}] };
-            }
-            return v;
-        });
-        const vente = data.ventes.find(v => v.id === id);
-        data.tresorerie.push({id: genId(), date, type: 'entree', cat: 'Vente', desc: 'Encaissement ' + vente.num, montant, mode});
-    } else {
-        data.achats = data.achats.map(a => {
-            if (a.id === id) {
-                const newPaye = a.paye + montant;
-                const statut = newPaye >= a.total ? 'payé' : 'partiel';
-                return { ...a, paye: newPaye, statut, paiements: [...(a.paiements || []), {date, montant, mode}] };
-            }
-            return a;
-        });
-        const achat = data.achats.find(a => a.id === id);
-        data.tresorerie.push({id: genId(), date, type: 'sortie', cat: 'Achat', desc: 'Paiement ' + achat.num, montant, mode});
+    try {
+        if (type === 'vente') {
+            const vente = data.ventes.find(v => v.id === id);
+            const newPaye = parseFloat(vente.paye) + montant;
+            const statut = newPaye >= parseFloat(vente.total) ? 'payée' : 'partielle';
+            
+            // Mettre à jour la vente
+            await db.from('ventes').update({ paye: newPaye, statut }).eq('id', id);
+            
+            // Ajouter en trésorerie
+            await db.from('tresorerie').insert([{
+                date,
+                type: 'entree',
+                categorie: 'Vente',
+                description: 'Encaissement ' + vente.num,
+                montant,
+                mode
+            }]);
+        } else {
+            const achat = data.achats.find(a => a.id === id);
+            const newPaye = parseFloat(achat.paye) + montant;
+            const statut = newPaye >= parseFloat(achat.total) ? 'payé' : 'partiel';
+            
+            // Mettre à jour l'achat
+            await db.from('achats').update({ paye: newPaye, statut }).eq('id', id);
+            
+            // Ajouter en trésorerie
+            await db.from('tresorerie').insert([{
+                date,
+                type: 'sortie',
+                categorie: 'Achat',
+                description: 'Paiement ' + achat.num,
+                montant,
+                mode
+            }]);
+        }
+        
+        toast.success('Paiement enregistré !');
+        closeModal();
+        await loadAllData();
+    } catch (error) {
+        console.error('Erreur:', error);
+        toast.error('Erreur lors de l\'enregistrement');
     }
-    toast.success('Paiement enregistré !'); closeModal();
 }
 
 function modalVente() {
@@ -1426,7 +1665,7 @@ function calcVenteTotal() {
     const total = venteLignes.reduce((s, l) => s + (l.qte * l.pu), 0);
     document.getElementById('vTotal').textContent = formatFCFA(total);
 }
-function saveVente() {
+async function saveVente() {
     const clientId = document.getElementById('vClient').value;
     if (!clientId) return toast.error('Sélectionnez un client');
     const lignes = venteLignes.filter(l => l.prodId);
@@ -1435,14 +1674,62 @@ function saveVente() {
     const paye = parseInt(document.getElementById('vPaye').value) || 0;
     const mode = document.getElementById('vMode').value;
     const statut = paye >= total ? 'payée' : (paye > 0 ? 'partielle' : 'impayée');
+    const dateVente = document.getElementById('vDate').value;
     const year = new Date().getFullYear();
-    const num = 'VTE-' + year + '-' + String(data.ventes.filter(v => v.num.includes(year)).length + 1).padStart(3, '0');
-    const vente = { id: genId(), num, date: document.getElementById('vDate').value, clientId, lignes, total, paye, statut, paiements: paye > 0 ? [{date: document.getElementById('vDate').value, montant: paye, mode}] : [] };
-    data.ventes.push(vente);
-    lignes.forEach(l => { data.produits = data.produits.map(p => p.id === l.prodId ? { ...p, stock: p.stock - l.qte } : p); });
-    if (paye > 0) { data.tresorerie.push({ id: genId(), date: vente.date, type: 'entree', cat: 'Vente', desc: 'Encaissement ' + num, montant: paye, mode }); }
-    venteLignes = [];
-    toast.success('Vente enregistrée !'); closeModal();
+    const num = 'VTE-' + year + '-' + String(data.ventes.filter(v => v.num && v.num.includes(year)).length + 1).padStart(3, '0');
+    
+    try {
+        // 1. Créer la vente
+        const { data: venteData, error: venteError } = await db.from('ventes').insert([{
+            num,
+            date: dateVente,
+            client_id: clientId,
+            total,
+            paye,
+            statut
+        }]).select();
+        
+        if (venteError) throw venteError;
+        const venteId = venteData[0].id;
+        
+        // 2. Créer les lignes de vente
+        const lignesData = lignes.map(l => ({
+            vente_id: venteId,
+            produit_id: l.prodId,
+            quantite: l.qte,
+            prix_unitaire: l.pu
+        }));
+        const { error: lignesError } = await db.from('ventes_lignes').insert(lignesData);
+        if (lignesError) throw lignesError;
+        
+        // 3. Mettre à jour les stocks
+        for (const l of lignes) {
+            const produit = data.produits.find(p => p.id === l.prodId);
+            if (produit) {
+                await db.from('produits').update({ stock: produit.stock - l.qte }).eq('id', l.prodId);
+            }
+        }
+        
+        // 4. Enregistrer le paiement en trésorerie si payé
+        if (paye > 0) {
+            await db.from('tresorerie').insert([{
+                date: dateVente,
+                type: 'entree',
+                categorie: 'Vente',
+                description: 'Encaissement ' + num,
+                montant: paye,
+                mode
+            }]);
+        }
+        
+        venteLignes = [];
+        toast.success('Vente enregistrée !');
+        closeModal();
+        await loadAllData();
+    } catch (error) {
+        console.error('Erreur:', error);
+        toast.error('Erreur lors de l\'enregistrement');
+    }
 }
 
 function pageAchats() {
@@ -1508,7 +1795,7 @@ function renderAchatLignes() {
     </tbody></table>`;
     document.getElementById('aTotal').textContent = formatFCFA(achatLignes.reduce((s, l) => s + (l.qte * l.pu), 0));
 }
-function saveAchat() {
+async function saveAchat() {
     const fournId = document.getElementById('aFourn').value;
     if (!fournId) return toast.error('Sélectionnez un fournisseur');
     const lignes = achatLignes.filter(l => l.prodId);
@@ -1517,14 +1804,62 @@ function saveAchat() {
     const paye = parseInt(document.getElementById('aPaye').value) || 0;
     const mode = document.getElementById('aMode').value;
     const statut = paye >= total ? 'payé' : (paye > 0 ? 'partiel' : 'impayé');
+    const dateAchat = document.getElementById('aDate').value;
     const year = new Date().getFullYear();
-    const num = 'ACH-' + year + '-' + String(data.achats.filter(a => a.num.includes(year)).length + 1).padStart(3, '0');
-    const achat = { id: genId(), num, date: document.getElementById('aDate').value, fournId, lignes, total, paye, statut, paiements: paye > 0 ? [{date: document.getElementById('aDate').value, montant: paye, mode}] : [] };
-    data.achats.push(achat);
-    lignes.forEach(l => { data.produits = data.produits.map(p => p.id === l.prodId ? { ...p, stock: p.stock + l.qte } : p); });
-    if (paye > 0) { data.tresorerie.push({ id: genId(), date: achat.date, type: 'sortie', cat: 'Achat', desc: 'Paiement ' + num, montant: paye, mode }); }
-    achatLignes = [];
-    toast.success('Achat enregistré !'); closeModal();
+    const num = 'ACH-' + year + '-' + String(data.achats.filter(a => a.num && a.num.includes(year)).length + 1).padStart(3, '0');
+    
+    try {
+        // 1. Créer l'achat
+        const { data: achatData, error: achatError } = await db.from('achats').insert([{
+            num,
+            date: dateAchat,
+            fournisseur_id: fournId,
+            total,
+            paye,
+            statut
+        }]).select();
+        
+        if (achatError) throw achatError;
+        const achatId = achatData[0].id;
+        
+        // 2. Créer les lignes d'achat
+        const lignesData = lignes.map(l => ({
+            achat_id: achatId,
+            produit_id: l.prodId,
+            quantite: l.qte,
+            prix_unitaire: l.pu
+        }));
+        const { error: lignesError } = await db.from('achats_lignes').insert(lignesData);
+        if (lignesError) throw lignesError;
+        
+        // 3. Mettre à jour les stocks
+        for (const l of lignes) {
+            const produit = data.produits.find(p => p.id === l.prodId);
+            if (produit) {
+                await db.from('produits').update({ stock: produit.stock + l.qte }).eq('id', l.prodId);
+            }
+        }
+        
+        // 4. Enregistrer le paiement en trésorerie si payé
+        if (paye > 0) {
+            await db.from('tresorerie').insert([{
+                date: dateAchat,
+                type: 'sortie',
+                categorie: 'Achat',
+                description: 'Paiement ' + num,
+                montant: paye,
+                mode
+            }]);
+        }
+        
+        achatLignes = [];
+        toast.success('Achat enregistré !');
+        closeModal();
+        await loadAllData();
+    } catch (error) {
+        console.error('Erreur:', error);
+        toast.error('Erreur lors de l\'enregistrement');
+    }
 }
 
 function pageTresorerie() {
@@ -1546,38 +1881,75 @@ function pageTresorerie() {
         </div>
         <div class="table-container">
             <table class="table">
-                <thead><tr><th>Date</th><th>Type</th><th>Catégorie</th><th>Description</th><th>Mode</th><th style="text-align:right">Montant</th></tr></thead>
+                <thead><tr><th>Date</th><th>Type</th><th>Catégorie</th><th>Description</th><th>Mode</th><th style="text-align:right">Montant</th><th style="text-align:right">Actions</th></tr></thead>
                 <tbody>
-                    ${data.tresorerie.slice().reverse().map(t => `<tr><td>${formatDate(t.date)}</td><td><span class="badge ${t.type === 'entree' ? 'badge-success' : 'badge-danger'}">${t.type === 'entree' ? '↑ Entrée' : '↓ Sortie'}</span></td><td>${t.cat}</td><td>${t.desc}</td><td>${t.mode}</td><td style="text-align:right;font-weight:600;color:${t.type === 'entree' ? 'var(--success)' : 'var(--danger)'}">${t.type === 'entree' ? '+' : '-'}${formatFCFA(t.montant)}</td></tr>`).join('')}
+                    ${data.tresorerie.length === 0 ? '<tr><td colspan="7"><div class="empty-state"><i class="fas fa-wallet"></i><h3>Aucun mouvement</h3><p>Ajoutez votre premier mouvement de trésorerie</p></div></td></tr>' : data.tresorerie.slice().reverse().map(t => `<tr><td>${formatDate(t.date)}</td><td><span class="badge ${t.type === 'entree' ? 'badge-success' : 'badge-danger'}">${t.type === 'entree' ? '↑ Entrée' : '↓ Sortie'}</span></td><td>${t.cat}</td><td>${t.desc}</td><td>${t.mode}</td><td style="text-align:right;font-weight:600;color:${t.type === 'entree' ? 'var(--success)' : 'var(--danger)'}">${t.type === 'entree' ? '+' : '-'}${formatFCFA(t.montant)}</td><td class="actions"><button class="btn-icon edit" onclick="modalTresorerie('${t.id}')"><i class="fas fa-pen"></i></button><button class="btn-icon delete" onclick="deleteTresorerie('${t.id}')"><i class="fas fa-trash"></i></button></td></tr>`).join('')}
                 </tbody>
             </table>
         </div>
     </div>`;
 }
 
-function modalTresorerie() {
-    openModal(`<div class="modal-header"><h2>Nouveau Mouvement</h2><button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button></div>
+function modalTresorerie(id) {
+    const t = id ? data.tresorerie.find(x => x.id === id) : { id: '', date: today(), type: 'entree', cat: '', desc: '', montant: 0, mode: 'Espèces' };
+    openModal(`<div class="modal-header"><h2>${id ? 'Modifier' : 'Nouveau'} Mouvement</h2><button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button></div>
         <div class="modal-body">
             <div class="form-grid">
-                <div class="form-group"><label class="form-label">Date</label><input class="form-input" type="date" id="tDate" value="${today()}"></div>
-                <div class="form-group"><label class="form-label">Type *</label><select class="form-select" id="tType"><option value="entree">Entrée</option><option value="sortie">Sortie</option></select></div>
-                <div class="form-group"><label class="form-label">Catégorie</label><select class="form-select" id="tCat"><option value="">--</option><option>Vente</option><option>Achat</option><option>Salaire</option><option>Loyer</option><option>Électricité</option><option>Transport</option><option>Apport</option><option>Autre</option></select></div>
-                <div class="form-group"><label class="form-label">Mode de paiement</label><select class="form-select" id="tMode"><option value="Espèces">💵 Espèces</option><option value="Virement">🏦 Virement bancaire</option><option value="Chèque">📝 Chèque</option><option value="Orange Money">🟠 Orange Money</option><option value="Wave">🌊 Wave</option><option value="Free Money">📱 Free Money</option><option value="Carte bancaire">💳 Carte bancaire</option></select></div>
-                <div class="form-group full"><label class="form-label">Description *</label><input class="form-input" type="text" id="tDesc" placeholder="Description du mouvement"></div>
-                <div class="form-group"><label class="form-label">Montant (FCFA) *</label><input class="form-input" type="number" id="tMontant" value="0"></div>
+                <div class="form-group"><label class="form-label">Date</label><input class="form-input" type="date" id="tDate" value="${t.date}"></div>
+                <div class="form-group"><label class="form-label">Type *</label><select class="form-select" id="tType"><option value="entree" ${t.type==='entree'?'selected':''}>Entrée</option><option value="sortie" ${t.type==='sortie'?'selected':''}>Sortie</option></select></div>
+                <div class="form-group"><label class="form-label">Catégorie</label><select class="form-select" id="tCat"><option value="">--</option><option ${t.cat==='Vente'?'selected':''}>Vente</option><option ${t.cat==='Achat'?'selected':''}>Achat</option><option ${t.cat==='Salaire'?'selected':''}>Salaire</option><option ${t.cat==='Loyer'?'selected':''}>Loyer</option><option ${t.cat==='Électricité'?'selected':''}>Électricité</option><option ${t.cat==='Transport'?'selected':''}>Transport</option><option ${t.cat==='Apport'?'selected':''}>Apport</option><option ${t.cat==='Autre'?'selected':''}>Autre</option></select></div>
+                <div class="form-group"><label class="form-label">Mode de paiement</label><select class="form-select" id="tMode"><option value="Espèces" ${t.mode==='Espèces'?'selected':''}>💵 Espèces</option><option value="Virement" ${t.mode==='Virement'?'selected':''}>🏦 Virement bancaire</option><option value="Chèque" ${t.mode==='Chèque'?'selected':''}>📝 Chèque</option><option value="Orange Money" ${t.mode==='Orange Money'?'selected':''}>🟠 Orange Money</option><option value="Wave" ${t.mode==='Wave'?'selected':''}>🌊 Wave</option><option value="Free Money" ${t.mode==='Free Money'?'selected':''}>📱 Free Money</option><option value="Carte bancaire" ${t.mode==='Carte bancaire'?'selected':''}>💳 Carte bancaire</option></select></div>
+                <div class="form-group full"><label class="form-label">Description *</label><input class="form-input" type="text" id="tDesc" value="${t.desc}" placeholder="Description du mouvement"></div>
+                <div class="form-group"><label class="form-label">Montant (FCFA) *</label><input class="form-input" type="number" id="tMontant" value="${t.montant}"></div>
             </div>
-            <div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Annuler</button><button class="btn btn-primary" onclick="saveTresorerie()"><i class="fas fa-check"></i> Enregistrer</button></div>
+            <div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Annuler</button><button class="btn btn-primary" onclick="saveTresorerie('${id || ''}')"><i class="fas fa-check"></i> Enregistrer</button></div>
         </div>`);
 }
 
-function saveTresorerie() {
+async function saveTresorerie(id) {
     const desc = document.getElementById('tDesc').value.trim();
     const montant = parseInt(document.getElementById('tMontant').value) || 0;
     if (!desc) return toast.error('Description obligatoire');
     if (montant <= 0) return toast.error('Montant invalide');
-    const mvt = { id: genId(), date: document.getElementById('tDate').value, type: document.getElementById('tType').value, cat: document.getElementById('tCat').value, desc, montant, mode: document.getElementById('tMode').value };
-    data.tresorerie.push(mvt);
-    toast.success('Mouvement enregistré !'); closeModal();
+    
+    const obj = { 
+        date: document.getElementById('tDate').value, 
+        type: document.getElementById('tType').value, 
+        categorie: document.getElementById('tCat').value, 
+        description: desc, 
+        montant, 
+        mode: document.getElementById('tMode').value 
+    };
+    
+    try {
+        if (id) {
+            const { error } = await db.from('tresorerie').update(obj).eq('id', id);
+            if (error) throw error;
+        } else {
+            const { error } = await db.from('tresorerie').insert([obj]);
+            if (error) throw error;
+        }
+        toast.success('Mouvement enregistré !');
+        closeModal();
+        await loadAllData();
+    } catch (error) {
+        console.error('Erreur:', error);
+        toast.error('Erreur lors de l\'enregistrement');
+    }
+}
+
+async function deleteTresorerie(id) { 
+    if (confirm('Supprimer ce mouvement ?')) { 
+        try {
+            const { error } = await db.from('tresorerie').delete().eq('id', id);
+            if (error) throw error;
+            toast.success('Mouvement supprimé');
+            await loadAllData();
+        } catch (error) {
+            console.error('Erreur:', error);
+            toast.error('Erreur lors de la suppression');
+        }
+    } 
 }
 
 function pageRapports() {
@@ -1657,15 +2029,48 @@ function modalEmploye(id) {
         </div>`);
 }
 
-function saveEmploye(id) {
+async function saveEmploye(id) {
     const nom = document.getElementById('eNom').value.trim();
     if (!nom) return toast.error('Nom obligatoire');
-    const obj = { id: id || genId(), matricule: document.getElementById('eMatricule').value, nom, prenom: document.getElementById('ePrenom').value, poste: document.getElementById('ePoste').value, salaire: parseInt(document.getElementById('eSalaire').value) || 0 };
-    if (id) { data.employes = data.employes.map(e => e.id === id ? obj : e); } else { data.employes.push(obj); }
-    toast.success('Employé enregistré'); closeModal();
+    
+    const obj = { 
+        matricule: document.getElementById('eMatricule').value, 
+        nom, 
+        prenom: document.getElementById('ePrenom').value, 
+        poste: document.getElementById('ePoste').value, 
+        salaire: parseInt(document.getElementById('eSalaire').value) || 0 
+    };
+    
+    try {
+        if (id) {
+            const { error } = await db.from('employes').update(obj).eq('id', id);
+            if (error) throw error;
+        } else {
+            const { error } = await db.from('employes').insert([obj]);
+            if (error) throw error;
+        }
+        toast.success('Employé enregistré');
+        closeModal();
+        await loadAllData();
+    } catch (error) {
+        console.error('Erreur:', error);
+        toast.error('Erreur lors de l\'enregistrement');
+    }
 }
 
-function deleteEmploye(id) { if (confirm('Supprimer ?')) { data.employes = data.employes.filter(e => e.id !== id); toast.success('Supprimé'); render(); } }
+async function deleteEmploye(id) { 
+    if (confirm('Supprimer ?')) { 
+        try {
+            const { error } = await db.from('employes').delete().eq('id', id);
+            if (error) throw error;
+            toast.success('Supprimé');
+            await loadAllData();
+        } catch (error) {
+            console.error('Erreur:', error);
+            toast.error('Erreur lors de la suppression');
+        }
+    } 
+}
 
 // ========== INIT ==========
 render();
