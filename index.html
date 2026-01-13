@@ -1200,7 +1200,7 @@ function saveClient(id) {
     if (!nom) return toast.error('Le nom est obligatoire');
     const obj = { id: id || genId(), code: document.getElementById('cCode').value, nom, type: document.getElementById('cType').value, telephone: document.getElementById('cTel').value, email: document.getElementById('cEmail').value, adresse: document.getElementById('cAdresse').value, ninea: document.getElementById('cNinea').value, contact: document.getElementById('cContact').value };
     if (id) { data.clients = data.clients.map(c => c.id === id ? obj : c); } else { data.clients.push(obj); }
-    toast.success('Client enregistré'); closeModal();
+    toast.success('Client enregistré'); closeModal(); render();
 }
 
 function deleteClient(id) { if (confirm('Supprimer ce client ?')) { data.clients = data.clients.filter(c => c.id !== id); toast.success('Client supprimé'); render(); } }
@@ -1250,7 +1250,7 @@ function saveFournisseur(id) {
     if (!nom) return toast.error('Le nom est obligatoire');
     const obj = { id: id || genId(), code: document.getElementById('fCode').value, nom, type: document.getElementById('fType').value, telephone: document.getElementById('fTel').value, adresse: document.getElementById('fAdresse').value, ninea: document.getElementById('fNinea').value, contact: document.getElementById('fContact').value };
     if (id) { data.fournisseurs = data.fournisseurs.map(f => f.id === id ? obj : f); } else { data.fournisseurs.push(obj); }
-    toast.success('Fournisseur enregistré'); closeModal();
+    toast.success('Fournisseur enregistré'); closeModal(); render();
 }
 
 function deleteFournisseur(id) { if (confirm('Supprimer ?')) { data.fournisseurs = data.fournisseurs.filter(f => f.id !== id); toast.success('Supprimé'); render(); } }
@@ -1347,7 +1347,7 @@ function modalPaiement(type, id) {
             <div class="form-grid">
                 <div class="form-group"><label class="form-label">Date du paiement</label><input class="form-input" type="date" id="pDate" value="${today()}"></div>
                 <div class="form-group"><label class="form-label">Montant (FCFA) *</label><input class="form-input" type="number" id="pMontant" value="${reste}" max="${reste}"></div>
-                <div class="form-group full"><label class="form-label">Mode de paiement</label><select class="form-select" id="pMode"><option value="espèces">Espèces</option><option value="virement">Virement bancaire</option><option value="chèque">Chèque</option><option value="mobile">Mobile Money</option></select></div>
+                <div class="form-group full"><label class="form-label">Mode de paiement</label><select class="form-select" id="pMode"><option value="Espèces">💵 Espèces</option><option value="Virement">🏦 Virement bancaire</option><option value="Chèque">📝 Chèque</option><option value="Orange Money">🟠 Orange Money</option><option value="Wave">🌊 Wave</option><option value="Free Money">📱 Free Money</option><option value="Carte bancaire">💳 Carte bancaire</option></select></div>
             </div>
             <div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Annuler</button><button class="btn btn-success" onclick="savePaiement('${type}','${id}')"><i class="fas fa-check"></i> Enregistrer le paiement</button></div>
         </div>`);
@@ -1395,9 +1395,14 @@ function modalVente() {
             <h4 style="margin:24px 0 16px;font-weight:600">Produits</h4>
             <div id="vLignes"></div>
             <button class="btn btn-ghost" onclick="addVenteLigne()" style="margin-top:12px"><i class="fas fa-plus"></i> Ajouter un produit</button>
-            <div style="margin-top:24px;padding:20px;background:var(--gray-50);border-radius:var(--radius);display:flex;justify-content:space-between;align-items:center">
-                <div><span style="font-weight:600">Total:</span> <span id="vTotal" style="font-size:28px;font-weight:800;color:var(--primary);margin-left:12px">0 F</span></div>
-                <div class="form-group" style="margin:0;width:200px"><label class="form-label">Montant payé</label><input class="form-input" type="number" id="vPaye" value="0" onchange="calcVenteTotal()"></div>
+            <div style="margin-top:24px;padding:20px;background:var(--gray-50);border-radius:var(--radius)">
+                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px">
+                    <div><span style="font-weight:600">Total:</span> <span id="vTotal" style="font-size:28px;font-weight:800;color:var(--primary);margin-left:12px">0 F</span></div>
+                    <div style="display:flex;gap:12px;align-items:flex-end">
+                        <div class="form-group" style="margin:0;width:180px"><label class="form-label">Mode paiement</label><select class="form-select" id="vMode"><option value="Espèces">💵 Espèces</option><option value="Virement">🏦 Virement</option><option value="Chèque">📝 Chèque</option><option value="Orange Money">🟠 Orange Money</option><option value="Wave">🌊 Wave</option><option value="Free Money">📱 Free Money</option></select></div>
+                        <div class="form-group" style="margin:0;width:150px"><label class="form-label">Montant payé</label><input class="form-input" type="number" id="vPaye" value="0" onchange="calcVenteTotal()"></div>
+                    </div>
+                </div>
             </div>
             <div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Annuler</button><button class="btn btn-primary" onclick="saveVente()"><i class="fas fa-check"></i> Enregistrer</button></div>
         </div>`, 'modal-lg');
@@ -1429,13 +1434,14 @@ function saveVente() {
     if (lignes.length === 0) return toast.error('Ajoutez au moins un produit');
     const total = lignes.reduce((s, l) => s + (l.qte * l.pu), 0);
     const paye = parseInt(document.getElementById('vPaye').value) || 0;
+    const mode = document.getElementById('vMode').value;
     const statut = paye >= total ? 'payée' : (paye > 0 ? 'partielle' : 'impayée');
     const year = new Date().getFullYear();
     const num = 'VTE-' + year + '-' + String(data.ventes.filter(v => v.num.includes(year)).length + 1).padStart(3, '0');
-    const vente = { id: genId(), num, date: document.getElementById('vDate').value, clientId, lignes, total, paye, statut, paiements: paye > 0 ? [{date: document.getElementById('vDate').value, montant: paye, mode: 'espèces'}] : [] };
+    const vente = { id: genId(), num, date: document.getElementById('vDate').value, clientId, lignes, total, paye, statut, paiements: paye > 0 ? [{date: document.getElementById('vDate').value, montant: paye, mode}] : [] };
     data.ventes.push(vente);
     lignes.forEach(l => { data.produits = data.produits.map(p => p.id === l.prodId ? { ...p, stock: p.stock - l.qte } : p); });
-    if (paye > 0) { data.tresorerie.push({ id: genId(), date: vente.date, type: 'entree', cat: 'Vente', desc: 'Encaissement ' + num, montant: paye, mode: 'espèces' }); }
+    if (paye > 0) { data.tresorerie.push({ id: genId(), date: vente.date, type: 'entree', cat: 'Vente', desc: 'Encaissement ' + num, montant: paye, mode }); }
     venteLignes = [];
     toast.success('Vente enregistrée !'); closeModal();
 }
@@ -1475,9 +1481,14 @@ function modalAchat() {
             <h4 style="margin:24px 0 16px;font-weight:600">Produits</h4>
             <div id="aLignes"></div>
             <button class="btn btn-ghost" onclick="addAchatLigne()" style="margin-top:12px"><i class="fas fa-plus"></i> Ajouter un produit</button>
-            <div style="margin-top:24px;padding:20px;background:var(--gray-50);border-radius:var(--radius);display:flex;justify-content:space-between;align-items:center">
-                <div><span style="font-weight:600">Total:</span> <span id="aTotal" style="font-size:28px;font-weight:800;color:var(--danger);margin-left:12px">0 F</span></div>
-                <div class="form-group" style="margin:0;width:200px"><label class="form-label">Montant payé</label><input class="form-input" type="number" id="aPaye" value="0"></div>
+            <div style="margin-top:24px;padding:20px;background:var(--gray-50);border-radius:var(--radius)">
+                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px">
+                    <div><span style="font-weight:600">Total:</span> <span id="aTotal" style="font-size:28px;font-weight:800;color:var(--danger);margin-left:12px">0 F</span></div>
+                    <div style="display:flex;gap:12px;align-items:flex-end">
+                        <div class="form-group" style="margin:0;width:180px"><label class="form-label">Mode paiement</label><select class="form-select" id="aMode"><option value="Espèces">💵 Espèces</option><option value="Virement">🏦 Virement</option><option value="Chèque">📝 Chèque</option><option value="Orange Money">🟠 Orange Money</option><option value="Wave">🌊 Wave</option><option value="Free Money">📱 Free Money</option></select></div>
+                        <div class="form-group" style="margin:0;width:150px"><label class="form-label">Montant payé</label><input class="form-input" type="number" id="aPaye" value="0"></div>
+                    </div>
+                </div>
             </div>
             <div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Annuler</button><button class="btn btn-primary" onclick="saveAchat()"><i class="fas fa-check"></i> Enregistrer</button></div>
         </div>`, 'modal-lg');
@@ -1505,12 +1516,14 @@ function saveAchat() {
     if (lignes.length === 0) return toast.error('Ajoutez au moins un produit');
     const total = lignes.reduce((s, l) => s + (l.qte * l.pu), 0);
     const paye = parseInt(document.getElementById('aPaye').value) || 0;
+    const mode = document.getElementById('aMode').value;
     const statut = paye >= total ? 'payé' : (paye > 0 ? 'partiel' : 'impayé');
-    const num = 'ACH-' + String(data.achats.length + 1).padStart(3, '0');
-    const achat = { id: genId(), num, date: document.getElementById('aDate').value, fournId, lignes, total, paye, statut };
+    const year = new Date().getFullYear();
+    const num = 'ACH-' + year + '-' + String(data.achats.filter(a => a.num.includes(year)).length + 1).padStart(3, '0');
+    const achat = { id: genId(), num, date: document.getElementById('aDate').value, fournId, lignes, total, paye, statut, paiements: paye > 0 ? [{date: document.getElementById('aDate').value, montant: paye, mode}] : [] };
     data.achats.push(achat);
     lignes.forEach(l => { data.produits = data.produits.map(p => p.id === l.prodId ? { ...p, stock: p.stock + l.qte } : p); });
-    if (paye > 0) { data.tresorerie.push({ id: genId(), date: achat.date, type: 'sortie', cat: 'Achat', desc: 'Paiement ' + num, montant: paye, mode: 'espèces' }); }
+    if (paye > 0) { data.tresorerie.push({ id: genId(), date: achat.date, type: 'sortie', cat: 'Achat', desc: 'Paiement ' + num, montant: paye, mode }); }
     achatLignes = [];
     toast.success('Achat enregistré !'); closeModal();
 }
@@ -1550,7 +1563,7 @@ function modalTresorerie() {
                 <div class="form-group"><label class="form-label">Date</label><input class="form-input" type="date" id="tDate" value="${today()}"></div>
                 <div class="form-group"><label class="form-label">Type *</label><select class="form-select" id="tType"><option value="entree">Entrée</option><option value="sortie">Sortie</option></select></div>
                 <div class="form-group"><label class="form-label">Catégorie</label><select class="form-select" id="tCat"><option value="">--</option><option>Vente</option><option>Achat</option><option>Salaire</option><option>Loyer</option><option>Électricité</option><option>Transport</option><option>Apport</option><option>Autre</option></select></div>
-                <div class="form-group"><label class="form-label">Mode de paiement</label><select class="form-select" id="tMode"><option value="espèces">Espèces</option><option value="virement">Virement</option><option value="chèque">Chèque</option><option value="mobile">Mobile Money</option></select></div>
+                <div class="form-group"><label class="form-label">Mode de paiement</label><select class="form-select" id="tMode"><option value="Espèces">💵 Espèces</option><option value="Virement">🏦 Virement bancaire</option><option value="Chèque">📝 Chèque</option><option value="Orange Money">🟠 Orange Money</option><option value="Wave">🌊 Wave</option><option value="Free Money">📱 Free Money</option><option value="Carte bancaire">💳 Carte bancaire</option></select></div>
                 <div class="form-group full"><label class="form-label">Description *</label><input class="form-input" type="text" id="tDesc" placeholder="Description du mouvement"></div>
                 <div class="form-group"><label class="form-label">Montant (FCFA) *</label><input class="form-input" type="number" id="tMontant" value="0"></div>
             </div>
