@@ -523,6 +523,7 @@
         }
 
         .badge-success { background: var(--success-light); color: var(--success); }
+        .badge-primary { background: var(--primary-light); color: var(--primary-dark); }
         .badge-warning { background: var(--warning-light); color: var(--warning); }
         .badge-danger { background: var(--danger-light); color: var(--danger); }
         .badge-primary { background: var(--primary-light); color: var(--primary-dark); }
@@ -844,13 +845,13 @@ const toast = {
 let data = {
     entreprise: { nom: 'Mon Entreprise', adresse: 'Dakar, Sénégal', telephone: '+221 77 000 00 00' },
     clients: [
-        { id: '1', nom: 'Amadou Diallo', telephone: '+221 77 123 45 67', email: 'amadou@email.com', adresse: 'Dakar' },
-        { id: '2', nom: 'Fatou Sow', telephone: '+221 78 234 56 78', email: 'fatou@email.com', adresse: 'Thiès' },
-        { id: '3', nom: 'Moussa Ndiaye', telephone: '+221 76 345 67 89', email: '', adresse: 'Saint-Louis' },
+        { id: '1', code: 'CLI-0001', nom: 'Amadou Diallo', type: 'particulier', telephone: '+221 77 123 45 67', email: 'amadou@email.com', adresse: 'Dakar', ninea: '', contact: '' },
+        { id: '2', code: 'CLI-0002', nom: 'SENELEC SA', type: 'entreprise', telephone: '+221 33 800 00 00', email: 'contact@senelec.sn', adresse: 'Dakar', ninea: '12345678A', contact: 'Fatou Sow - DG' },
+        { id: '3', code: 'CLI-0003', nom: 'Association Jeunesse', type: 'association', telephone: '+221 76 345 67 89', email: '', adresse: 'Saint-Louis', ninea: '', contact: 'Moussa Ndiaye' },
     ],
     fournisseurs: [
-        { id: '1', nom: 'SENEGAL DISTRIBUTION', telephone: '+221 33 800 00 00', adresse: 'Dakar' },
-        { id: '2', nom: 'TOUBA TRADING', telephone: '+221 33 900 00 00', adresse: 'Touba' },
+        { id: '1', code: 'FRN-0001', nom: 'SENEGAL DISTRIBUTION', type: 'entreprise', telephone: '+221 33 800 00 00', adresse: 'Dakar', ninea: '98765432B', contact: 'Ibrahim Fall' },
+        { id: '2', code: 'FRN-0002', nom: 'TOUBA TRADING', type: 'entreprise', telephone: '+221 33 900 00 00', adresse: 'Touba', ninea: '45678901C', contact: 'Modou Diop' },
     ],
     categories: [
         { id: '1', nom: 'Alimentation' },
@@ -864,16 +865,20 @@ let data = {
         { id: '4', ref: 'PRD004', nom: 'Téléphone Basique', catId: '3', prixAchat: 15000, prixVente: 20000, stock: 15, stockMin: 5 },
     ],
     ventes: [
-        { id: '1', num: 'VTE-001', date: '2025-01-10', clientId: '1', lignes: [{prodId:'1',qte:2,pu:15000}], total: 30000, paye: 30000, statut: 'payée' },
-        { id: '2', num: 'VTE-002', date: '2025-01-12', clientId: '2', lignes: [{prodId:'2',qte:1,pu:22000}], total: 22000, paye: 0, statut: 'impayée' },
+        { id: '1', num: 'VTE-2025-001', date: '2025-01-10', clientId: '1', lignes: [{prodId:'1',qte:2,pu:15000}], total: 30000, paye: 30000, statut: 'payée', paiements: [{date:'2025-01-10',montant:30000,mode:'espèces'}] },
+        { id: '2', num: 'VTE-2025-002', date: '2025-01-12', clientId: '2', lignes: [{prodId:'2',qte:1,pu:22000},{prodId:'3',qte:2,pu:10000}], total: 42000, paye: 20000, statut: 'partielle', paiements: [{date:'2025-01-12',montant:20000,mode:'virement'}] },
+        { id: '3', num: 'VTE-2025-003', date: '2025-01-13', clientId: '3', lignes: [{prodId:'4',qte:3,pu:20000}], total: 60000, paye: 0, statut: 'impayée', paiements: [] },
     ],
     achats: [
-        { id: '1', num: 'ACH-001', date: '2025-01-08', fournId: '1', lignes: [{prodId:'1',qte:20,pu:12000}], total: 240000, paye: 240000, statut: 'payé' },
+        { id: '1', num: 'ACH-2025-001', date: '2025-01-08', fournId: '1', lignes: [{prodId:'1',qte:20,pu:12000}], total: 240000, paye: 240000, statut: 'payé', paiements: [{date:'2025-01-08',montant:240000,mode:'virement'}] },
+        { id: '2', num: 'ACH-2025-002', date: '2025-01-09', fournId: '2', lignes: [{prodId:'2',qte:10,pu:18000}], total: 180000, paye: 100000, statut: 'partiel', paiements: [{date:'2025-01-09',montant:100000,mode:'espèces'}] },
     ],
     tresorerie: [
         { id: '1', date: '2025-01-05', type: 'entree', cat: 'Apport', desc: 'Capital initial', montant: 500000, mode: 'espèces' },
-        { id: '2', date: '2025-01-08', type: 'sortie', cat: 'Achat', desc: 'Paiement ACH-001', montant: 240000, mode: 'virement' },
-        { id: '3', date: '2025-01-10', type: 'entree', cat: 'Vente', desc: 'VTE-001', montant: 30000, mode: 'espèces' },
+        { id: '2', date: '2025-01-08', type: 'sortie', cat: 'Achat', desc: 'Paiement ACH-2025-001', montant: 240000, mode: 'virement' },
+        { id: '3', date: '2025-01-09', type: 'sortie', cat: 'Achat', desc: 'Acompte ACH-2025-002', montant: 100000, mode: 'espèces' },
+        { id: '4', date: '2025-01-10', type: 'entree', cat: 'Vente', desc: 'VTE-2025-001', montant: 30000, mode: 'espèces' },
+        { id: '5', date: '2025-01-12', type: 'entree', cat: 'Vente', desc: 'Acompte VTE-2025-002', montant: 20000, mode: 'virement' },
     ],
     employes: [
         { id: '1', matricule: 'EMP001', nom: 'Diop', prenom: 'Ibrahima', poste: 'Gérant', salaire: 350000 },
@@ -881,7 +886,32 @@ let data = {
     ]
 };
 
-let state = { page: 'dashboard', search: '' };
+let state = { page: 'dashboard', search: '', filterYear: new Date().getFullYear(), filterDateStart: '', filterDateEnd: '' };
+
+// ========== HELPERS FILTRES ==========
+const genCode = prefix => prefix + '-' + String(Math.floor(Math.random() * 9000) + 1000);
+const getYear = d => d ? new Date(d).getFullYear() : new Date().getFullYear();
+const getTypeBadge = type => {
+    const cls = { entreprise: 'badge-primary', particulier: 'badge-success', association: 'badge-warning' };
+    return `<span class="badge ${cls[type]||'badge-success'}">${type||'particulier'}</span>`;
+};
+
+function filterByDate(items, dateField = 'date') {
+    let filtered = items;
+    if (state.filterYear) filtered = filtered.filter(item => getYear(item[dateField]) === parseInt(state.filterYear));
+    if (state.filterDateStart) filtered = filtered.filter(item => item[dateField] >= state.filterDateStart);
+    if (state.filterDateEnd) filtered = filtered.filter(item => item[dateField] <= state.filterDateEnd);
+    return filtered;
+}
+
+function getYears() {
+    const years = new Set();
+    data.ventes.forEach(v => years.add(getYear(v.date)));
+    data.achats.forEach(a => years.add(getYear(a.date)));
+    data.tresorerie.forEach(t => years.add(getYear(t.date)));
+    years.add(new Date().getFullYear());
+    return Array.from(years).sort((a, b) => b - a);
+}
 
 // ========== EXCEL ==========
 const excel = {
@@ -1135,12 +1165,12 @@ function pageClients() {
                 <button class="btn btn-primary" onclick="modalClient()"><i class="fas fa-plus"></i> Nouveau client</button>
             </div>
         </div>
-        <div class="search-box"><i class="fas fa-search"></i><input type="text" placeholder="Rechercher un client..." value="${state.search}" oninput="state.search=this.value;render()"></div>
+        <div class="search-box"><i class="fas fa-search"></i><input type="text" placeholder="Rechercher par nom, code ou téléphone..." value="${state.search}" oninput="state.search=this.value;render()"></div>
         <div class="table-container">
             <table class="table">
-                <thead><tr><th>Client</th><th>Téléphone</th><th>Email</th><th>Adresse</th><th style="text-align:right">Actions</th></tr></thead>
+                <thead><tr><th>Code</th><th>Type</th><th>Nom / Raison sociale</th><th>Téléphone</th><th>NINEA</th><th>Contact</th><th style="text-align:right">Actions</th></tr></thead>
                 <tbody>
-                    ${filtered.length === 0 ? '<tr><td colspan="5"><div class="empty-state"><i class="fas fa-users"></i><h3>Aucun client trouvé</h3></div></td></tr>' : filtered.map(c => `<tr><td class="name">${c.nom}</td><td>${c.telephone}</td><td>${c.email || '-'}</td><td>${c.adresse || '-'}</td><td class="actions"><button class="btn-icon edit" onclick="modalClient('${c.id}')"><i class="fas fa-pen"></i></button><button class="btn-icon delete" onclick="deleteClient('${c.id}')"><i class="fas fa-trash"></i></button></td></tr>`).join('')}
+                    ${filtered.length === 0 ? '<tr><td colspan="7"><div class="empty-state"><i class="fas fa-users"></i><h3>Aucun client trouvé</h3></div></td></tr>' : filtered.map(c => `<tr><td><span class="code">${c.code||'-'}</span></td><td>${getTypeBadge(c.type)}</td><td class="name">${c.nom}</td><td>${c.telephone}</td><td>${c.ninea || '-'}</td><td>${c.contact || '-'}</td><td class="actions"><button class="btn-icon edit" onclick="modalClient('${c.id}')"><i class="fas fa-pen"></i></button><button class="btn-icon delete" onclick="deleteClient('${c.id}')"><i class="fas fa-trash"></i></button></td></tr>`).join('')}
                 </tbody>
             </table>
         </div>
@@ -1148,23 +1178,27 @@ function pageClients() {
 }
 
 function modalClient(id) {
-    const c = id ? data.clients.find(x => x.id === id) : { id: '', nom: '', telephone: '', email: '', adresse: '' };
+    const c = id ? data.clients.find(x => x.id === id) : { id: '', code: genCode('CLI'), nom: '', type: 'particulier', telephone: '', email: '', adresse: '', ninea: '', contact: '' };
     openModal(`<div class="modal-header"><h2>${id ? 'Modifier' : 'Nouveau'} Client</h2><button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button></div>
         <div class="modal-body">
             <div class="form-grid">
-                <div class="form-group"><label class="form-label">Nom *</label><input class="form-input" type="text" id="cNom" value="${c.nom}" placeholder="Nom complet"></div>
+                <div class="form-group"><label class="form-label">Code Client</label><input class="form-input" type="text" id="cCode" value="${c.code||genCode('CLI')}" readonly style="background:var(--gray-100)"></div>
+                <div class="form-group"><label class="form-label">Type *</label><select class="form-input" id="cType"><option value="particulier" ${c.type==='particulier'?'selected':''}>Particulier</option><option value="entreprise" ${c.type==='entreprise'?'selected':''}>Entreprise</option><option value="association" ${c.type==='association'?'selected':''}>Association</option></select></div>
+                <div class="form-group full"><label class="form-label">Nom / Raison sociale *</label><input class="form-input" type="text" id="cNom" value="${c.nom}" placeholder="Nom complet ou raison sociale"></div>
                 <div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" type="text" id="cTel" value="${c.telephone}" placeholder="+221 77 xxx xx xx"></div>
                 <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" id="cEmail" value="${c.email || ''}" placeholder="email@exemple.com"></div>
-                <div class="form-group"><label class="form-label">Adresse</label><input class="form-input" type="text" id="cAdresse" value="${c.adresse || ''}" placeholder="Ville, Quartier"></div>
+                <div class="form-group full"><label class="form-label">Adresse</label><input class="form-input" type="text" id="cAdresse" value="${c.adresse || ''}" placeholder="Ville, Quartier"></div>
+                <div class="form-group"><label class="form-label">NINEA</label><input class="form-input" type="text" id="cNinea" value="${c.ninea || ''}" placeholder="Numéro NINEA (entreprises)"></div>
+                <div class="form-group"><label class="form-label">Contact principal</label><input class="form-input" type="text" id="cContact" value="${c.contact || ''}" placeholder="Nom - Fonction"></div>
             </div>
             <div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Annuler</button><button class="btn btn-primary" onclick="saveClient('${id}')"><i class="fas fa-check"></i> Enregistrer</button></div>
-        </div>`);
+        </div>`, 'modal-lg');
 }
 
 function saveClient(id) {
     const nom = document.getElementById('cNom').value.trim();
     if (!nom) return toast.error('Le nom est obligatoire');
-    const obj = { id: id || genId(), nom, telephone: document.getElementById('cTel').value, email: document.getElementById('cEmail').value, adresse: document.getElementById('cAdresse').value };
+    const obj = { id: id || genId(), code: document.getElementById('cCode').value, nom, type: document.getElementById('cType').value, telephone: document.getElementById('cTel').value, email: document.getElementById('cEmail').value, adresse: document.getElementById('cAdresse').value, ninea: document.getElementById('cNinea').value, contact: document.getElementById('cContact').value };
     if (id) { data.clients = data.clients.map(c => c.id === id ? obj : c); } else { data.clients.push(obj); }
     toast.success('Client enregistré'); closeModal();
 }
@@ -1172,7 +1206,7 @@ function saveClient(id) {
 function deleteClient(id) { if (confirm('Supprimer ce client ?')) { data.clients = data.clients.filter(c => c.id !== id); toast.success('Client supprimé'); render(); } }
 
 function pageFournisseurs() {
-    const filtered = data.fournisseurs.filter(f => f.nom.toLowerCase().includes(state.search.toLowerCase()));
+    const filtered = data.fournisseurs.filter(f => f.nom.toLowerCase().includes(state.search.toLowerCase()) || (f.code||'').toLowerCase().includes(state.search.toLowerCase()));
     return `<div class="page">
         <div class="page-header">
             <div><h1 class="page-title">Fournisseurs</h1><p class="page-subtitle">${data.fournisseurs.length} fournisseurs enregistrés</p></div>
@@ -1181,12 +1215,12 @@ function pageFournisseurs() {
                 <button class="btn btn-primary" onclick="modalFournisseur()"><i class="fas fa-plus"></i> Nouveau fournisseur</button>
             </div>
         </div>
-        <div class="search-box"><i class="fas fa-search"></i><input type="text" placeholder="Rechercher un fournisseur..." value="${state.search}" oninput="state.search=this.value;render()"></div>
+        <div class="search-box"><i class="fas fa-search"></i><input type="text" placeholder="Rechercher par nom ou code..." value="${state.search}" oninput="state.search=this.value;render()"></div>
         <div class="table-container">
             <table class="table">
-                <thead><tr><th>Fournisseur</th><th>Téléphone</th><th>Adresse</th><th style="text-align:right">Actions</th></tr></thead>
+                <thead><tr><th>Code</th><th>Type</th><th>Nom</th><th>Téléphone</th><th>NINEA</th><th>Contact</th><th style="text-align:right">Actions</th></tr></thead>
                 <tbody>
-                    ${filtered.length === 0 ? '<tr><td colspan="4"><div class="empty-state"><i class="fas fa-truck"></i><h3>Aucun fournisseur trouvé</h3></div></td></tr>' : filtered.map(f => `<tr><td class="name">${f.nom}</td><td>${f.telephone}</td><td>${f.adresse || '-'}</td><td class="actions"><button class="btn-icon edit" onclick="modalFournisseur('${f.id}')"><i class="fas fa-pen"></i></button><button class="btn-icon delete" onclick="deleteFournisseur('${f.id}')"><i class="fas fa-trash"></i></button></td></tr>`).join('')}
+                    ${filtered.length === 0 ? '<tr><td colspan="7"><div class="empty-state"><i class="fas fa-truck"></i><h3>Aucun fournisseur trouvé</h3></div></td></tr>' : filtered.map(f => `<tr><td><span class="code">${f.code||'-'}</span></td><td>${getTypeBadge(f.type)}</td><td class="name">${f.nom}</td><td>${f.telephone}</td><td>${f.ninea || '-'}</td><td>${f.contact || '-'}</td><td class="actions"><button class="btn-icon edit" onclick="modalFournisseur('${f.id}')"><i class="fas fa-pen"></i></button><button class="btn-icon delete" onclick="deleteFournisseur('${f.id}')"><i class="fas fa-trash"></i></button></td></tr>`).join('')}
                 </tbody>
             </table>
         </div>
@@ -1194,22 +1228,27 @@ function pageFournisseurs() {
 }
 
 function modalFournisseur(id) {
-    const f = id ? data.fournisseurs.find(x => x.id === id) : { id: '', nom: '', telephone: '', adresse: '' };
+    const f = id ? data.fournisseurs.find(x => x.id === id) : { id: '', code: genCode('FRN'), nom: '', type: 'entreprise', telephone: '', adresse: '', ninea: '', contact: '' };
     openModal(`<div class="modal-header"><h2>${id ? 'Modifier' : 'Nouveau'} Fournisseur</h2><button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button></div>
         <div class="modal-body">
             <div class="form-grid">
+                <div class="form-group"><label class="form-label">Code</label><input class="form-input" type="text" id="fCode" value="${f.code||genCode('FRN')}" readonly style="background:var(--gray-100)"></div>
+                <div class="form-group"><label class="form-label">Type</label><select class="form-input" id="fType"><option value="entreprise" ${f.type==='entreprise'?'selected':''}>Entreprise</option><option value="particulier" ${f.type==='particulier'?'selected':''}>Particulier</option></select></div>
                 <div class="form-group full"><label class="form-label">Nom *</label><input class="form-input" type="text" id="fNom" value="${f.nom}" placeholder="Nom du fournisseur"></div>
                 <div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" type="text" id="fTel" value="${f.telephone}" placeholder="+221 33 xxx xx xx"></div>
                 <div class="form-group"><label class="form-label">Adresse</label><input class="form-input" type="text" id="fAdresse" value="${f.adresse || ''}" placeholder="Adresse"></div>
             </div>
+                <div class="form-group"><label class="form-label">NINEA</label><input class="form-input" type="text" id="fNinea" value="${f.ninea||''}" placeholder="Numéro NINEA"></div>
+                <div class="form-group full"><label class="form-label">Contact</label><input class="form-input" type="text" id="fContact" value="${f.contact||''}" placeholder="Nom - Fonction"></div>
+            </div>
             <div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Annuler</button><button class="btn btn-primary" onclick="saveFournisseur('${id}')"><i class="fas fa-check"></i> Enregistrer</button></div>
-        </div>`);
+        </div>`, 'modal-lg');
 }
 
 function saveFournisseur(id) {
     const nom = document.getElementById('fNom').value.trim();
     if (!nom) return toast.error('Le nom est obligatoire');
-    const obj = { id: id || genId(), nom, telephone: document.getElementById('fTel').value, adresse: document.getElementById('fAdresse').value };
+    const obj = { id: id || genId(), code: document.getElementById('fCode').value, nom, type: document.getElementById('fType').value, telephone: document.getElementById('fTel').value, adresse: document.getElementById('fAdresse').value, ninea: document.getElementById('fNinea').value, contact: document.getElementById('fContact').value };
     if (id) { data.fournisseurs = data.fournisseurs.map(f => f.id === id ? obj : f); } else { data.fournisseurs.push(obj); }
     toast.success('Fournisseur enregistré'); closeModal();
 }
@@ -1275,15 +1314,75 @@ function pageVentes() {
                 <button class="btn btn-primary" onclick="modalVente()"><i class="fas fa-plus"></i> Nouvelle vente</button>
             </div>
         </div>
+        <div class="filter-bar" style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:center">
+            <select class="form-select" style="width:auto" onchange="state.filterYear=this.value;render()"><option value="">Toutes années</option>${getYears().map(y=>`<option value="${y}" ${state.filterYear==y?'selected':''}>${y}</option>`).join('')}</select>
+            <div style="display:flex;align-items:center;gap:8px"><span style="color:var(--gray-500)">Du:</span><input class="form-input" type="date" value="${state.filterDateStart}" onchange="state.filterDateStart=this.value;render()" style="width:auto"></div>
+            <div style="display:flex;align-items:center;gap:8px"><span style="color:var(--gray-500)">Au:</span><input class="form-input" type="date" value="${state.filterDateEnd}" onchange="state.filterDateEnd=this.value;render()" style="width:auto"></div>
+        </div>
         <div class="table-container">
             <table class="table">
                 <thead><tr><th>N° Facture</th><th>Date</th><th>Client</th><th>Total</th><th>Payé</th><th>Reste</th><th>Statut</th><th style="text-align:right">Actions</th></tr></thead>
                 <tbody>
-                    ${data.ventes.slice().reverse().map(v => { const c = data.clients.find(x => x.id === v.clientId); return `<tr><td><span class="code">${v.num}</span></td><td>${formatDate(v.date)}</td><td class="name">${c?.nom || '-'}</td><td>${formatFCFA(v.total)}</td><td style="color:var(--success)">${formatFCFA(v.paye)}</td><td style="color:${v.total - v.paye > 0 ? 'var(--warning)' : 'var(--gray-400)'}">${formatFCFA(v.total - v.paye)}</td><td><span class="badge ${v.statut === 'payée' ? 'badge-success' : 'badge-warning'}">${v.statut}</span></td><td class="actions"><button class="btn btn-sm btn-secondary" onclick="pdf.facture(data.ventes.find(x=>x.id==='${v.id}'))"><i class="fas fa-file-pdf"></i> PDF</button></td></tr>`; }).join('')}
+                    ${filterByDate(data.ventes).slice().reverse().map(v => { const c = data.clients.find(x => x.id === v.clientId); const reste = v.total - v.paye; return `<tr><td><span class="code">${v.num}</span></td><td>${formatDate(v.date)}</td><td class="name">${c?.nom || '-'}</td><td>${formatFCFA(v.total)}</td><td style="color:var(--success)">${formatFCFA(v.paye)}</td><td style="color:${reste > 0 ? 'var(--danger)' : 'var(--gray-400)'}; font-weight:600">${formatFCFA(reste)}</td><td><span class="badge ${v.statut === 'payée' ? 'badge-success' : v.statut === 'partielle' ? 'badge-warning' : 'badge-danger'}">${v.statut}</span></td><td class="actions">${reste > 0 ? `<button class="btn btn-sm btn-success" onclick="modalPaiement('vente','${v.id}')"><i class="fas fa-money-bill-wave"></i> Payer</button> ` : ''}<button class="btn btn-sm btn-secondary" onclick="pdf.facture(data.ventes.find(x=>x.id==='${v.id}'))"><i class="fas fa-file-pdf"></i> PDF</button></td></tr>`; }).join('')}
                 </tbody>
             </table>
         </div>
     </div>`;
+}
+
+// ========== MODAL PAIEMENT ==========
+function modalPaiement(type, id) {
+    const item = type === 'vente' ? data.ventes.find(v => v.id === id) : data.achats.find(a => a.id === id);
+    const reste = item.total - item.paye;
+    const title = type === 'vente' ? 'Encaissement Client' : 'Paiement Fournisseur';
+    const color = type === 'vente' ? 'var(--success)' : 'var(--warning)';
+    openModal(`<div class="modal-header"><h2><i class="fas fa-money-bill-wave" style="color:${color};margin-right:10px"></i>${title}</h2><button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button></div>
+        <div class="modal-body">
+            <div style="background:var(--gray-50);padding:20px;border-radius:var(--radius);margin-bottom:24px">
+                <div style="display:flex;justify-content:space-between;margin-bottom:12px"><span style="color:var(--gray-500)">Document:</span><strong>${item.num}</strong></div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:12px"><span style="color:var(--gray-500)">Total:</span><strong>${formatFCFA(item.total)}</strong></div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:12px"><span style="color:var(--gray-500)">Déjà payé:</span><strong style="color:var(--success)">${formatFCFA(item.paye)}</strong></div>
+                <div style="display:flex;justify-content:space-between;border-top:2px solid var(--gray-200);padding-top:12px;margin-top:12px"><span style="font-weight:600">Reste à payer:</span><strong style="font-size:24px;color:var(--danger)">${formatFCFA(reste)}</strong></div>
+            </div>
+            <div class="form-grid">
+                <div class="form-group"><label class="form-label">Date du paiement</label><input class="form-input" type="date" id="pDate" value="${today()}"></div>
+                <div class="form-group"><label class="form-label">Montant (FCFA) *</label><input class="form-input" type="number" id="pMontant" value="${reste}" max="${reste}"></div>
+                <div class="form-group full"><label class="form-label">Mode de paiement</label><select class="form-select" id="pMode"><option value="espèces">Espèces</option><option value="virement">Virement bancaire</option><option value="chèque">Chèque</option><option value="mobile">Mobile Money</option></select></div>
+            </div>
+            <div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Annuler</button><button class="btn btn-success" onclick="savePaiement('${type}','${id}')"><i class="fas fa-check"></i> Enregistrer le paiement</button></div>
+        </div>`);
+}
+
+function savePaiement(type, id) {
+    const montant = parseInt(document.getElementById('pMontant').value) || 0;
+    if (montant <= 0) return toast.error('Montant invalide');
+    const date = document.getElementById('pDate').value;
+    const mode = document.getElementById('pMode').value;
+    
+    if (type === 'vente') {
+        data.ventes = data.ventes.map(v => {
+            if (v.id === id) {
+                const newPaye = v.paye + montant;
+                const statut = newPaye >= v.total ? 'payée' : 'partielle';
+                return { ...v, paye: newPaye, statut, paiements: [...(v.paiements || []), {date, montant, mode}] };
+            }
+            return v;
+        });
+        const vente = data.ventes.find(v => v.id === id);
+        data.tresorerie.push({id: genId(), date, type: 'entree', cat: 'Vente', desc: 'Encaissement ' + vente.num, montant, mode});
+    } else {
+        data.achats = data.achats.map(a => {
+            if (a.id === id) {
+                const newPaye = a.paye + montant;
+                const statut = newPaye >= a.total ? 'payé' : 'partiel';
+                return { ...a, paye: newPaye, statut, paiements: [...(a.paiements || []), {date, montant, mode}] };
+            }
+            return a;
+        });
+        const achat = data.achats.find(a => a.id === id);
+        data.tresorerie.push({id: genId(), date, type: 'sortie', cat: 'Achat', desc: 'Paiement ' + achat.num, montant, mode});
+    }
+    toast.success('Paiement enregistré !'); closeModal();
 }
 
 function modalVente() {
@@ -1331,8 +1430,9 @@ function saveVente() {
     const total = lignes.reduce((s, l) => s + (l.qte * l.pu), 0);
     const paye = parseInt(document.getElementById('vPaye').value) || 0;
     const statut = paye >= total ? 'payée' : (paye > 0 ? 'partielle' : 'impayée');
-    const num = 'VTE-' + String(data.ventes.length + 1).padStart(3, '0');
-    const vente = { id: genId(), num, date: document.getElementById('vDate').value, clientId, lignes, total, paye, statut };
+    const year = new Date().getFullYear();
+    const num = 'VTE-' + year + '-' + String(data.ventes.filter(v => v.num.includes(year)).length + 1).padStart(3, '0');
+    const vente = { id: genId(), num, date: document.getElementById('vDate').value, clientId, lignes, total, paye, statut, paiements: paye > 0 ? [{date: document.getElementById('vDate').value, montant: paye, mode: 'espèces'}] : [] };
     data.ventes.push(vente);
     lignes.forEach(l => { data.produits = data.produits.map(p => p.id === l.prodId ? { ...p, stock: p.stock - l.qte } : p); });
     if (paye > 0) { data.tresorerie.push({ id: genId(), date: vente.date, type: 'entree', cat: 'Vente', desc: 'Encaissement ' + num, montant: paye, mode: 'espèces' }); }
@@ -1349,11 +1449,16 @@ function pageAchats() {
                 <button class="btn btn-primary" onclick="modalAchat()"><i class="fas fa-plus"></i> Nouvel achat</button>
             </div>
         </div>
+        <div class="filter-bar" style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:center">
+            <select class="form-select" style="width:auto" onchange="state.filterYear=this.value;render()"><option value="">Toutes années</option>${getYears().map(y=>`<option value="${y}" ${state.filterYear==y?'selected':''}>${y}</option>`).join('')}</select>
+            <div style="display:flex;align-items:center;gap:8px"><span style="color:var(--gray-500)">Du:</span><input class="form-input" type="date" value="${state.filterDateStart}" onchange="state.filterDateStart=this.value;render()" style="width:auto"></div>
+            <div style="display:flex;align-items:center;gap:8px"><span style="color:var(--gray-500)">Au:</span><input class="form-input" type="date" value="${state.filterDateEnd}" onchange="state.filterDateEnd=this.value;render()" style="width:auto"></div>
+        </div>
         <div class="table-container">
             <table class="table">
-                <thead><tr><th>N° Commande</th><th>Date</th><th>Fournisseur</th><th>Total</th><th>Payé</th><th>Reste</th><th>Statut</th></tr></thead>
+                <thead><tr><th>N° Commande</th><th>Date</th><th>Fournisseur</th><th>Total</th><th>Payé</th><th>Reste</th><th>Statut</th><th style="text-align:right">Actions</th></tr></thead>
                 <tbody>
-                    ${data.achats.slice().reverse().map(a => { const f = data.fournisseurs.find(x => x.id === a.fournId); return `<tr><td><span class="code">${a.num}</span></td><td>${formatDate(a.date)}</td><td class="name">${f?.nom || '-'}</td><td>${formatFCFA(a.total)}</td><td style="color:var(--success)">${formatFCFA(a.paye)}</td><td style="color:${a.total - a.paye > 0 ? 'var(--danger)' : 'var(--gray-400)'}">${formatFCFA(a.total - a.paye)}</td><td><span class="badge ${a.statut === 'payé' ? 'badge-success' : 'badge-danger'}">${a.statut}</span></td></tr>`; }).join('')}
+                    ${filterByDate(data.achats).slice().reverse().map(a => { const f = data.fournisseurs.find(x => x.id === a.fournId); const reste = a.total - a.paye; return `<tr><td><span class="code">${a.num}</span></td><td>${formatDate(a.date)}</td><td class="name">${f?.nom || '-'}</td><td>${formatFCFA(a.total)}</td><td style="color:var(--success)">${formatFCFA(a.paye)}</td><td style="color:${reste > 0 ? 'var(--danger)' : 'var(--gray-400)'}; font-weight:600">${formatFCFA(reste)}</td><td><span class="badge ${a.statut === 'payé' ? 'badge-success' : a.statut === 'partiel' ? 'badge-warning' : 'badge-danger'}">${a.statut}</span></td><td class="actions">${reste > 0 ? `<button class="btn btn-sm btn-warning" onclick="modalPaiement('achat','${a.id}')"><i class="fas fa-money-bill-wave"></i> Payer</button>` : ''}</td></tr>`; }).join('')}
                 </tbody>
             </table>
         </div>
