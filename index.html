@@ -1265,7 +1265,189 @@ function saveProduit(id) {
 }
 
 function deleteProduit(id) { if (confirm('Supprimer ?')) { data.produits = data.produits.filter(p => p.id !== id); toast.success('Supprimé'); render(); } }
-ant (FCFA) *</label><input class="form-input" type="number" id="tMontant" value="0"></div>
+
+function pageVentes() {
+    return `<div class="page">
+        <div class="page-header">
+            <div><h1 class="page-title">Ventes</h1><p class="page-subtitle">${data.ventes.length} ventes enregistrées</p></div>
+            <div class="page-actions">
+                <button class="btn btn-secondary" onclick="excel.ventes()"><i class="fas fa-file-excel"></i> Exporter</button>
+                <button class="btn btn-primary" onclick="modalVente()"><i class="fas fa-plus"></i> Nouvelle vente</button>
+            </div>
+        </div>
+        <div class="table-container">
+            <table class="table">
+                <thead><tr><th>N° Facture</th><th>Date</th><th>Client</th><th>Total</th><th>Payé</th><th>Reste</th><th>Statut</th><th style="text-align:right">Actions</th></tr></thead>
+                <tbody>
+                    ${data.ventes.slice().reverse().map(v => { const c = data.clients.find(x => x.id === v.clientId); return `<tr><td><span class="code">${v.num}</span></td><td>${formatDate(v.date)}</td><td class="name">${c?.nom || '-'}</td><td>${formatFCFA(v.total)}</td><td style="color:var(--success)">${formatFCFA(v.paye)}</td><td style="color:${v.total - v.paye > 0 ? 'var(--warning)' : 'var(--gray-400)'}">${formatFCFA(v.total - v.paye)}</td><td><span class="badge ${v.statut === 'payée' ? 'badge-success' : 'badge-warning'}">${v.statut}</span></td><td class="actions"><button class="btn btn-sm btn-secondary" onclick="pdf.facture(data.ventes.find(x=>x.id==='${v.id}'))"><i class="fas fa-file-pdf"></i> PDF</button></td></tr>`; }).join('')}
+                </tbody>
+            </table>
+        </div>
+    </div>`;
+}
+
+function modalVente() {
+    openModal(`<div class="modal-header"><h2>Nouvelle Vente</h2><button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button></div>
+        <div class="modal-body">
+            <div class="form-grid">
+                <div class="form-group"><label class="form-label">Client *</label><select class="form-select" id="vClient"><option value="">-- Sélectionner --</option>${data.clients.map(c => `<option value="${c.id}">${c.nom}</option>`).join('')}</select></div>
+                <div class="form-group"><label class="form-label">Date</label><input class="form-input" type="date" id="vDate" value="${today()}"></div>
+            </div>
+            <h4 style="margin:24px 0 16px;font-weight:600">Produits</h4>
+            <div id="vLignes"></div>
+            <button class="btn btn-ghost" onclick="addVenteLigne()" style="margin-top:12px"><i class="fas fa-plus"></i> Ajouter un produit</button>
+            <div style="margin-top:24px;padding:20px;background:var(--gray-50);border-radius:var(--radius);display:flex;justify-content:space-between;align-items:center">
+                <div><span style="font-weight:600">Total:</span> <span id="vTotal" style="font-size:28px;font-weight:800;color:var(--primary);margin-left:12px">0 F</span></div>
+                <div class="form-group" style="margin:0;width:200px"><label class="form-label">Montant payé</label><input class="form-input" type="number" id="vPaye" value="0" onchange="calcVenteTotal()"></div>
+            </div>
+            <div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Annuler</button><button class="btn btn-primary" onclick="saveVente()"><i class="fas fa-check"></i> Enregistrer</button></div>
+        </div>`, 'modal-lg');
+    setTimeout(() => { addVenteLigne(); }, 100);
+}
+
+let venteLignes = [];
+function addVenteLigne() { venteLignes.push({ prodId: '', qte: 1, pu: 0 }); renderVenteLignes(); }
+function removeVenteLigne(i) { venteLignes.splice(i, 1); renderVenteLignes(); }
+function updateVenteLigne(i, field, val) {
+    venteLignes[i][field] = val;
+    if (field === 'prodId') { const p = data.produits.find(x => x.id === val); if (p) venteLignes[i].pu = p.prixVente; }
+    renderVenteLignes();
+}
+function renderVenteLignes() {
+    document.getElementById('vLignes').innerHTML = `<table class="table" style="margin:0"><thead><tr><th>Produit</th><th style="width:100px">Qté</th><th style="width:120px">Prix Unit.</th><th style="width:120px">Total</th><th style="width:50px"></th></tr></thead><tbody>
+        ${venteLignes.map((l, i) => `<tr><td><select class="form-select" onchange="updateVenteLigne(${i},'prodId',this.value)"><option value="">--</option>${data.produits.map(p => `<option value="${p.id}" ${l.prodId === p.id ? 'selected' : ''}>${p.nom} (${p.stock})</option>`).join('')}</select></td><td><input class="form-input" type="number" min="1" value="${l.qte}" onchange="updateVenteLigne(${i},'qte',parseInt(this.value)||1)"></td><td><input class="form-input" type="number" value="${l.pu}" onchange="updateVenteLigne(${i},'pu',parseInt(this.value)||0)"></td><td style="font-weight:600">${formatFCFA(l.qte * l.pu)}</td><td><button class="btn-icon delete" onclick="removeVenteLigne(${i})"><i class="fas fa-trash"></i></button></td></tr>`).join('')}
+    </tbody></table>`;
+    calcVenteTotal();
+}
+function calcVenteTotal() {
+    const total = venteLignes.reduce((s, l) => s + (l.qte * l.pu), 0);
+    document.getElementById('vTotal').textContent = formatFCFA(total);
+}
+function saveVente() {
+    const clientId = document.getElementById('vClient').value;
+    if (!clientId) return toast.error('Sélectionnez un client');
+    const lignes = venteLignes.filter(l => l.prodId);
+    if (lignes.length === 0) return toast.error('Ajoutez au moins un produit');
+    const total = lignes.reduce((s, l) => s + (l.qte * l.pu), 0);
+    const paye = parseInt(document.getElementById('vPaye').value) || 0;
+    const statut = paye >= total ? 'payée' : (paye > 0 ? 'partielle' : 'impayée');
+    const num = 'VTE-' + String(data.ventes.length + 1).padStart(3, '0');
+    const vente = { id: genId(), num, date: document.getElementById('vDate').value, clientId, lignes, total, paye, statut };
+    data.ventes.push(vente);
+    lignes.forEach(l => { data.produits = data.produits.map(p => p.id === l.prodId ? { ...p, stock: p.stock - l.qte } : p); });
+    if (paye > 0) { data.tresorerie.push({ id: genId(), date: vente.date, type: 'entree', cat: 'Vente', desc: 'Encaissement ' + num, montant: paye, mode: 'espèces' }); }
+    venteLignes = [];
+    toast.success('Vente enregistrée !'); closeModal();
+}
+
+function pageAchats() {
+    return `<div class="page">
+        <div class="page-header">
+            <div><h1 class="page-title">Achats</h1><p class="page-subtitle">${data.achats.length} achats enregistrés</p></div>
+            <div class="page-actions">
+                <button class="btn btn-secondary" onclick="excel.achats()"><i class="fas fa-file-excel"></i> Exporter</button>
+                <button class="btn btn-primary" onclick="modalAchat()"><i class="fas fa-plus"></i> Nouvel achat</button>
+            </div>
+        </div>
+        <div class="table-container">
+            <table class="table">
+                <thead><tr><th>N° Commande</th><th>Date</th><th>Fournisseur</th><th>Total</th><th>Payé</th><th>Reste</th><th>Statut</th></tr></thead>
+                <tbody>
+                    ${data.achats.slice().reverse().map(a => { const f = data.fournisseurs.find(x => x.id === a.fournId); return `<tr><td><span class="code">${a.num}</span></td><td>${formatDate(a.date)}</td><td class="name">${f?.nom || '-'}</td><td>${formatFCFA(a.total)}</td><td style="color:var(--success)">${formatFCFA(a.paye)}</td><td style="color:${a.total - a.paye > 0 ? 'var(--danger)' : 'var(--gray-400)'}">${formatFCFA(a.total - a.paye)}</td><td><span class="badge ${a.statut === 'payé' ? 'badge-success' : 'badge-danger'}">${a.statut}</span></td></tr>`; }).join('')}
+                </tbody>
+            </table>
+        </div>
+    </div>`;
+}
+
+function modalAchat() {
+    openModal(`<div class="modal-header"><h2>Nouvel Achat</h2><button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button></div>
+        <div class="modal-body">
+            <div class="form-grid">
+                <div class="form-group"><label class="form-label">Fournisseur *</label><select class="form-select" id="aFourn"><option value="">-- Sélectionner --</option>${data.fournisseurs.map(f => `<option value="${f.id}">${f.nom}</option>`).join('')}</select></div>
+                <div class="form-group"><label class="form-label">Date</label><input class="form-input" type="date" id="aDate" value="${today()}"></div>
+            </div>
+            <h4 style="margin:24px 0 16px;font-weight:600">Produits</h4>
+            <div id="aLignes"></div>
+            <button class="btn btn-ghost" onclick="addAchatLigne()" style="margin-top:12px"><i class="fas fa-plus"></i> Ajouter un produit</button>
+            <div style="margin-top:24px;padding:20px;background:var(--gray-50);border-radius:var(--radius);display:flex;justify-content:space-between;align-items:center">
+                <div><span style="font-weight:600">Total:</span> <span id="aTotal" style="font-size:28px;font-weight:800;color:var(--danger);margin-left:12px">0 F</span></div>
+                <div class="form-group" style="margin:0;width:200px"><label class="form-label">Montant payé</label><input class="form-input" type="number" id="aPaye" value="0"></div>
+            </div>
+            <div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Annuler</button><button class="btn btn-primary" onclick="saveAchat()"><i class="fas fa-check"></i> Enregistrer</button></div>
+        </div>`, 'modal-lg');
+    setTimeout(() => { addAchatLigne(); }, 100);
+}
+
+let achatLignes = [];
+function addAchatLigne() { achatLignes.push({ prodId: '', qte: 1, pu: 0 }); renderAchatLignes(); }
+function removeAchatLigne(i) { achatLignes.splice(i, 1); renderAchatLignes(); }
+function updateAchatLigne(i, field, val) {
+    achatLignes[i][field] = val;
+    if (field === 'prodId') { const p = data.produits.find(x => x.id === val); if (p) achatLignes[i].pu = p.prixAchat; }
+    renderAchatLignes();
+}
+function renderAchatLignes() {
+    document.getElementById('aLignes').innerHTML = `<table class="table" style="margin:0"><thead><tr><th>Produit</th><th style="width:100px">Qté</th><th style="width:120px">Prix Unit.</th><th style="width:120px">Total</th><th style="width:50px"></th></tr></thead><tbody>
+        ${achatLignes.map((l, i) => `<tr><td><select class="form-select" onchange="updateAchatLigne(${i},'prodId',this.value)"><option value="">--</option>${data.produits.map(p => `<option value="${p.id}" ${l.prodId === p.id ? 'selected' : ''}>${p.nom}</option>`).join('')}</select></td><td><input class="form-input" type="number" min="1" value="${l.qte}" onchange="updateAchatLigne(${i},'qte',parseInt(this.value)||1)"></td><td><input class="form-input" type="number" value="${l.pu}" onchange="updateAchatLigne(${i},'pu',parseInt(this.value)||0)"></td><td style="font-weight:600">${formatFCFA(l.qte * l.pu)}</td><td><button class="btn-icon delete" onclick="removeAchatLigne(${i})"><i class="fas fa-trash"></i></button></td></tr>`).join('')}
+    </tbody></table>`;
+    document.getElementById('aTotal').textContent = formatFCFA(achatLignes.reduce((s, l) => s + (l.qte * l.pu), 0));
+}
+function saveAchat() {
+    const fournId = document.getElementById('aFourn').value;
+    if (!fournId) return toast.error('Sélectionnez un fournisseur');
+    const lignes = achatLignes.filter(l => l.prodId);
+    if (lignes.length === 0) return toast.error('Ajoutez au moins un produit');
+    const total = lignes.reduce((s, l) => s + (l.qte * l.pu), 0);
+    const paye = parseInt(document.getElementById('aPaye').value) || 0;
+    const statut = paye >= total ? 'payé' : (paye > 0 ? 'partiel' : 'impayé');
+    const num = 'ACH-' + String(data.achats.length + 1).padStart(3, '0');
+    const achat = { id: genId(), num, date: document.getElementById('aDate').value, fournId, lignes, total, paye, statut };
+    data.achats.push(achat);
+    lignes.forEach(l => { data.produits = data.produits.map(p => p.id === l.prodId ? { ...p, stock: p.stock + l.qte } : p); });
+    if (paye > 0) { data.tresorerie.push({ id: genId(), date: achat.date, type: 'sortie', cat: 'Achat', desc: 'Paiement ' + num, montant: paye, mode: 'espèces' }); }
+    achatLignes = [];
+    toast.success('Achat enregistré !'); closeModal();
+}
+
+function pageTresorerie() {
+    const entrees = data.tresorerie.filter(t => t.type === 'entree').reduce((s, t) => s + t.montant, 0);
+    const sorties = data.tresorerie.filter(t => t.type === 'sortie').reduce((s, t) => s + t.montant, 0);
+    const solde = entrees - sorties;
+    return `<div class="page">
+        <div class="page-header">
+            <div><h1 class="page-title">Trésorerie</h1><p class="page-subtitle">Suivi des flux de trésorerie</p></div>
+            <div class="page-actions">
+                <button class="btn btn-secondary" onclick="excel.tresorerie()"><i class="fas fa-file-excel"></i> Exporter</button>
+                <button class="btn btn-primary" onclick="modalTresorerie()"><i class="fas fa-plus"></i> Nouveau mouvement</button>
+            </div>
+        </div>
+        <div class="summary-cards">
+            <div class="summary-card entree"><div class="label">Total Entrées</div><div class="value">${formatFCFA(entrees)}</div></div>
+            <div class="summary-card sortie"><div class="label">Total Sorties</div><div class="value">${formatFCFA(sorties)}</div></div>
+            <div class="summary-card solde"><div class="label">Solde</div><div class="value">${formatFCFA(solde)}</div></div>
+        </div>
+        <div class="table-container">
+            <table class="table">
+                <thead><tr><th>Date</th><th>Type</th><th>Catégorie</th><th>Description</th><th>Mode</th><th style="text-align:right">Montant</th></tr></thead>
+                <tbody>
+                    ${data.tresorerie.slice().reverse().map(t => `<tr><td>${formatDate(t.date)}</td><td><span class="badge ${t.type === 'entree' ? 'badge-success' : 'badge-danger'}">${t.type === 'entree' ? '↑ Entrée' : '↓ Sortie'}</span></td><td>${t.cat}</td><td>${t.desc}</td><td>${t.mode}</td><td style="text-align:right;font-weight:600;color:${t.type === 'entree' ? 'var(--success)' : 'var(--danger)'}">${t.type === 'entree' ? '+' : '-'}${formatFCFA(t.montant)}</td></tr>`).join('')}
+                </tbody>
+            </table>
+        </div>
+    </div>`;
+}
+
+function modalTresorerie() {
+    openModal(`<div class="modal-header"><h2>Nouveau Mouvement</h2><button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button></div>
+        <div class="modal-body">
+            <div class="form-grid">
+                <div class="form-group"><label class="form-label">Date</label><input class="form-input" type="date" id="tDate" value="${today()}"></div>
+                <div class="form-group"><label class="form-label">Type *</label><select class="form-select" id="tType"><option value="entree">Entrée</option><option value="sortie">Sortie</option></select></div>
+                <div class="form-group"><label class="form-label">Catégorie</label><select class="form-select" id="tCat"><option value="">--</option><option>Vente</option><option>Achat</option><option>Salaire</option><option>Loyer</option><option>Électricité</option><option>Transport</option><option>Apport</option><option>Autre</option></select></div>
+                <div class="form-group"><label class="form-label">Mode de paiement</label><select class="form-select" id="tMode"><option value="espèces">Espèces</option><option value="virement">Virement</option><option value="chèque">Chèque</option><option value="mobile">Mobile Money</option></select></div>
+                <div class="form-group full"><label class="form-label">Description *</label><input class="form-input" type="text" id="tDesc" placeholder="Description du mouvement"></div>
+                <div class="form-group"><label class="form-label">Montant (FCFA) *</label><input class="form-input" type="number" id="tMontant" value="0"></div>
             </div>
             <div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Annuler</button><button class="btn btn-primary" onclick="saveTresorerie()"><i class="fas fa-check"></i> Enregistrer</button></div>
         </div>`);
