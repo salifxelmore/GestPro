@@ -841,11 +841,6 @@ const toast = {
     warning(m) { this.show(m, 'warning'); }
 };
 
-// ========== SUPABASE ==========
-const SUPABASE_URL = 'https://utrxljpolthjradxrcnj.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0cnhsanBvbHRoanJhZHhyY25qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgyOTUyMzYsImV4cCI6MjA4Mzg3MTIzNn0.yIOfhszNIdQEftLHIHn5BvdHjPNDEtw6wS-euZFGuAQ';
-const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
 // ========== DONNÉES ==========
 let data = {
     entreprise: { nom: 'Mon Entreprise', adresse: 'Dakar, Sénégal', telephone: '+221 77 000 00 00' },
